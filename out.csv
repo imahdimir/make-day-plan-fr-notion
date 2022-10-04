@@ -1,0 +1,49 @@
+INDENT,PRIORITY,CONTENT,TYPE
+1,4,MPC,section
+1,4,Cold Shower @Min,task
+1,4,Wash Face-Nose-Ears @Min,task
+1,2,Jinkotd - Alventa - Jinsing @Min,task
+1,2,Breakfast @full,task
+1,4,Before Leave,section
+1,4,Take @Min,task
+2,4,Keys,task
+2,4,Drugs,task
+2,4,Mac,task
+2,4,Freebuds,task
+2,4,Phone,task
+2,4,Phone Charger,task
+1,4,Uni Way,section
+1,4,Rec Spends,task
+1,4,Sleep Data - Google Fit,task
+1,4,Eff,task
+1,4,Before Noon,section
+1,4,A post,task
+1,4,Latte,task
+1,4,Lunch,section
+1,4,Wash Face & Hands,task
+1,4,🧂 - Lunch -🧂 - 🧽 Dish,task
+1,4,Teeth Brush - Mouthwash - Floss,task
+1,4,Vitamin D,task
+1,4,Apple Vinegar (if not harmful - Not after Yogurt),task
+1,4,For 1h-Do NOT Drink Water-Other Liquid,task
+1,4,Drink Water ONLY bf lunch,task
+1,4,Evening,section
+1,4,Take Lunch Dishes,task
+1,4,A Post,task
+1,4,Home Way,section
+1,4,Rec Spends,task
+1,4,Rec Work Log - H,task
+1,4,Eff,task
+1,4,NPC,section
+1,1,🚨 Plan Next Day - 10m Max,task
+1,4,Dinner,section
+1,4,Apple Vinegar (if not harmful - Not after Yogurt),task
+1,4,Drink Water Only Before Dinner,task
+1,4,For 1h-Do NOT Drink Water-Other Liquid,task
+1,4,Garlic,task
+1,4,🧂 - Dinner - 🧂,task
+1,4,Before Bed,section
+1,4,DND,task
+1,4,Set Alarm - 3 Backup Alarm,task
+1,4,Teeth Brush - Mouthwash - Floss,task
+1,4,Plug Phone,task
