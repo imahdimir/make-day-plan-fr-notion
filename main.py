@@ -18,7 +18,7 @@ from make_csv import get_select_col_val
 from make_csv import get_txt_content_fr_notion_name
 from make_csv import indent_fillna
 from make_csv import Notion
-from make_csv import Types
+from make_csv import Types , add_t_type_to_cnt
 
 
 no = Notion()
@@ -43,8 +43,12 @@ c = ColName1()
 
 def make_labels_list(df) :
     lbl_cols = {
-            c.tty : None
             }
+
+    if not lbl_cols :
+        df[c.labels] = df[c.cnt].apply(lambda x : [])
+        return df
+
     _fu = lambda x : [x] if x is not None else []
     df[c.labels] = df[list(lbl_cols.keys())[0]].apply(_fu)
     for col in list(lbl_cols.keys())[1 :] :
@@ -124,7 +128,7 @@ def main() :
     df1 = df.copy()
     df1 = df1[c.js].apply(lambda x : pd.Series(eval(x)))
     df1 = df1[['id' , 'properties']]
-    ##
+
     df1 = df1['properties'].apply(pd.Series)
     ##
     apply_dct = {
@@ -155,6 +159,9 @@ def main() :
     df1 = fillna_priority(df1)
     ##
     df1 = make_labels_list(df1)
+    ##
+    df1 = add_t_type_to_cnt(df1)
+
     ##
 
     del_all_sections()
