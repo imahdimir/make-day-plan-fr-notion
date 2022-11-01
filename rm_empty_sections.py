@@ -104,3 +104,24 @@ if False :
 
     ##
     df1 = get_all_tasks()
+
+    ##
+    from githubdata import GitHubDataRepo
+
+
+    url = 'https://github.com/imahdimir/make-day-plan-in-Todoist-fr-notion'
+
+    ##
+    ghd = GitHubDataRepo(url)
+
+    ##
+    ghd.clone_overwrite()
+
+    ##
+    from purl import URL
+
+
+    u = URL.from_string(url)
+
+    ##
+    u
