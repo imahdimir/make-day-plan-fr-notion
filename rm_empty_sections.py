@@ -109,7 +109,7 @@ if False :
     from githubdata import GitHubDataRepo
 
 
-    url = 'https://github.com/imahdimir/make-day-plan-in-Todoist-fr-notion'
+    url = 'https://github.com/Doist/todoist-api-python'
 
     ##
     ghd = GitHubDataRepo(url)
