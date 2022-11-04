@@ -11,9 +11,12 @@ from todoist_api_python.api_async import TodoistAPIAsync
 
 from day_plan import del_sections
 from day_plan import get_all_sections
-from day_plan import to
+from day_plan import Todoist
 from day_plan import ts
+from day_plan import get_daily_routine_project_id
 
+
+to = Todoist()
 
 class TodoistTask :
     assignee_id = 'assignee_id'
@@ -59,6 +62,9 @@ def main() :
     dt = get_all_tasks()
 
     ##
+    to.proj_id = get_daily_routine_project_id()
+
+    ##
     msk = ds[ts.project_id].eq(to.proj_id)
 
     print(len(msk[msk]))
@@ -88,40 +94,5 @@ if False :
     pass
 
     ##
-    tsks = asyncio.run(get_all_tasks())
-    ##
-    tsks[0].__dict__
 
     ##
-    tt = TodoistTask()
-    tt.assignee_id
-
-    ##
-    t = Task()
-
-    ##
-    rnsvoc(Task)
-
-    ##
-    df1 = get_all_tasks()
-
-    ##
-    from githubdata import GitHubDataRepo
-
-
-    url = 'https://github.com/Doist/todoist-api-python'
-
-    ##
-    ghd = GitHubDataRepo(url)
-
-    ##
-    ghd.clone_overwrite()
-
-    ##
-    from purl import URL
-
-
-    u = URL.from_string(url)
-
-    ##
-    u

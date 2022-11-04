@@ -57,8 +57,7 @@ class Todoist :
     hdrs = {
             'Authorization' : f'Bearer {tok}'
             }
-    proj_id = '2281475079'
-    al_sec_url = f'https://api.todoist.com/rest/v2/sections?project_id={proj_id}'
+    proj_id = None
 
 to = Todoist()
 
@@ -70,6 +69,23 @@ class TodoistSection :
 
 ts = TodoistSection()
 tsd = rnsvoc(TodoistSection)
+
+class TodoistProject :
+    color = 'color'
+    comment_count = 'comment_count'
+    id = 'id'
+    is_favorite = 'is_favorite'
+    is_inbox_project = 'is_inbox_project'
+    is_shared = 'is_shared'
+    is_team_inbox = 'is_team_inbox'
+    name = 'name'
+    order = 'order'
+    parent_id = 'parent_id'
+    url = 'url'
+    view_style = 'view_style'
+
+tp = TodoistProject()
+tpd = rnsvoc(TodoistProject)
 
 def get_txt_content_fr_notion_name(name) :
     ti = name['title']
@@ -150,6 +166,20 @@ def make_labels_list(df) :
         df[c.labels] = df[c.labels] + df[col].apply(_fu)
     return df
 
+def get_all_todoist_projects() :
+    apia = TodoistAPIAsync(to.tok)
+    secs = asyncio.run(apia.get_projects())
+    df = pd.DataFrame()
+    for col in tpd :
+        df[col] = [getattr(x , col) for x in secs]
+    return df
+
+def get_daily_routine_project_id() :
+    df = get_all_todoist_projects()
+    msk = df[tp.name].eq('📆')
+    ind = df[msk].index[0]
+    return df.at[ind , tp.id]
+
 async def get_sections_async() :
     api = TodoistAPIAsync(to.tok)
     try :
@@ -210,11 +240,12 @@ def main() :
 
     ##
     proxies = {
-            'http'  : '192.168.75.57:8080' ,
-            'https' : '192.168.75.57:8080' ,
+            'http'  : '172.31.0.235:8080' ,
+            'https' : '172.31.0.235:8080' ,
             }
 
     if False :
+
         pass
 
         ##
@@ -243,6 +274,7 @@ def main() :
 
     ##
     if False :
+
         pass
 
         ##
@@ -302,7 +334,13 @@ def main() :
     df1 = add_t_type_to_cnt(df1)
 
     ##
+    to.proj_id = get_daily_routine_project_id()
 
+    ##
+    print(to.proj_id)
+    assert to.proj_id is not None
+
+    ##
     del_all_sections()
 
     ##
@@ -321,3 +359,12 @@ def main() :
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
+
+##
+if False :
+
+    pass
+
+    ##
+
+    ##
