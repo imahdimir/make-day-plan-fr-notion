@@ -337,7 +337,7 @@ def main() :
     to.proj_id = get_daily_routine_project_id()
 
     ##
-    print(to.proj_id)
+    print('Todoit Project ID: ' + to.proj_id)
     assert to.proj_id is not None
 
     ##
