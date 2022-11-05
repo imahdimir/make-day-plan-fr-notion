@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "make-day-plan-in-Todoist-fr-notion"
+version = "0.1.0"
+authors = [{ name = "Mahdi Mir", email = "imahdimir@gmail.com" }]
+description = "make-day-plan-in-Todoist-fr-notion"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "pandas",
+    "mirutil",
+]
