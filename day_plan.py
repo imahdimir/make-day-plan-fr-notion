@@ -368,3 +368,55 @@ if False :
     ##
 
     ##
+    from pathlib import Path
+    import subprocess
+    from mirutil.files import read_json_file
+    from mirutil.auto_run import Conf
+    from giteasy import GitHubRepo
+
+
+    conf = Conf()
+
+    def make_venv(fp = Path('conf.json')) :
+        js = read_json_file(fp)
+
+        rp_url = js[conf.repo_url]
+        ghr = GitHubRepo(rp_url)
+
+        pyv = js[conf.python_version]
+
+        subprocess.run(['pyenv' , 'install' , '--skip-existing' , pyv])
+        subprocess.run(['pyenv' , 'virtualenv-delete' , '-f' , ghr.repo_name])
+        subprocess.run(['pyenv' , 'virtualenv' , pyv , ghr.repo_name])
+
+        print(ghr.repo_name)
+
+    def ret_dirn(fp = Path('conf.json')) :
+        from giteasy.github_releases import \
+            download_latest_release_of_public_github_repo
+
+        js = read_json_file(fp)
+
+        rp_url = js[conf.repo_url]
+        dirp = download_latest_release_of_public_github_repo(rp_url)
+        print(dirp.name)
+
+    def ret_module_2_run_name(fp = Path('conf.json')) :
+        js = read_json_file(fp)
+        print(js[conf.module_2_run])
+
+    ##
+    rpu = 'https://github.com/imahdimir/make-day-plan-in-Todoist-fr-notion'
+    from giteasy.github_releases import \
+        download_latest_release_of_public_github_repo
+
+
+    dirp = download_latest_release_of_public_github_repo(rpu)
+
+    ##
+    js = read_json_file('conf.json')
+    rp_url = js[conf.repo_url]
+    dirp = download_latest_release_of_public_github_repo(rp_url)
+    print(dirp)
+
+##

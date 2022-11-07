@@ -67,17 +67,17 @@ def main() :
     ##
     msk = ds[ts.project_id].eq(to.proj_id)
 
-    print(len(msk[msk]))
+    print('All sections count in the project: ' , len(msk[msk]))
 
     ##
     msk &= ~ ds[ts.id].isin(dt[tt.section_id])
 
-    print(len(msk[msk]))
+    print('Empty sections: ' , len(msk[msk]))
 
     ##
     msk &= ~ ds[ts.name].str.contains('📌')
 
-    print(len(msk[msk]))
+    print('Not pinned (!📌) and empty sections: ' , len(msk[msk]))
 
     ##
     del_sections(ds.loc[msk , ts.id])
