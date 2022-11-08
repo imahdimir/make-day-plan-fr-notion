@@ -2,14 +2,12 @@
 
     """
 
-import asyncio
 from functools import partial
 from pathlib import Path
 
 import pandas as pd
 import requests
 from todoist_api_python.api import TodoistAPI
-from todoist_api_python.api_async import TodoistAPIAsync
 
 from models import ColName
 from models import Notion
@@ -110,22 +108,6 @@ def make_labels_list(df) :
     for col in list(lbl_cols.keys())[1 :] :
         df[c.labels] = df[c.labels] + df[col].apply(_fu)
     return df
-
-def get_all_todoist_projects() :
-    apia = TodoistAPIAsync(to.tok)
-    secs = asyncio.run(apia.get_projects())
-    df = pd.DataFrame()
-    for col in tpd :
-        df[col] = [getattr(x , col) for x in secs]
-    return df
-
-async def get_sections_async() :
-    api = TodoistAPIAsync(to.tok)
-    try :
-        scs = await api.get_sections()
-        return scs
-    except Exception as error :
-        print(error)
 
 def del_all_sections() :
     df = get_all_sections()

@@ -6,16 +6,20 @@ import asyncio
 
 import pandas as pd
 from todoist_api_python.api import TodoistAPI
+from todoist_api_python.api_async import TodoistAPIAsync
 
-from day_plan import get_all_todoist_projects
-from day_plan import get_sections_async
-from day_plan import to
-from day_plan import tp
-from day_plan import tsd
+from models import Todoist
+from models import TodoistProject
+from models import TodoistSection
 
 
 def ret_not_special_items_of_a_class(cls) :
     return {x : y for x , y in cls.__dict__.items() if not x.startswith('__')}
+
+to = Todoist()
+tp = TodoistProject()
+tpd = ret_not_special_items_of_a_class(TodoistProject)
+tsd = ret_not_special_items_of_a_class(TodoistSection)
 
 def get_daily_routine_project_id() :
     df = get_all_todoist_projects()
@@ -34,3 +38,19 @@ def del_sections(id_list) :
     api = TodoistAPI(to.tok)
     for id in id_list :
         api.delete_section(id)
+
+def get_all_todoist_projects() :
+    apia = TodoistAPIAsync(to.tok)
+    secs = asyncio.run(apia.get_projects())
+    df = pd.DataFrame()
+    for col in tpd :
+        df[col] = [getattr(x , col) for x in secs]
+    return df
+
+async def get_sections_async() :
+    api = TodoistAPIAsync(to.tok)
+    try :
+        scs = await api.get_sections()
+        return scs
+    except Exception as error :
+        print(error)
