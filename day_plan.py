@@ -8,84 +8,29 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-from mirutil.classs import return_not_special_variables_of_class as rnsvoc
-from mirutil.df import df_apply_parallel as dfap
-from mirutil.tok import get_token as get_tok
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.api_async import TodoistAPIAsync
 
+from models import ColName
+from models import Notion
+from models import Todoist
+from models import TodoistProject
+from models import TodoistSection
+from models import Types
+from util import del_sections
+from util import get_all_sections
+from util import get_daily_routine_project_id
+from util import ret_not_special_items_of_a_class as rnsioac
 
-class ColName :
-    url = 'url'
-    js = 'json'
-    th = 'T-[h]'
-    tm = 'T-[m]'
-    indnt = 'INDENT'
-    srt = 'sort'
-    sec = 'section'
-    pri = 'PRIORITY'
-    tty = 'T Type'
-    cnt = 'CONTENT'
-    ty = "TYPE"
-    secn = 'secn'
-    sec_id = 'sec_id'
-    par_id = 'par_id'
-    labels = 'labels'
 
 c = ColName()
-
-class Types :
-    tsk = 'task'
-    sec = 'section'
-
 ty = Types()
-
-class Notion :
-    tok = get_tok('Notion')
-    db_id = '60c2cf7059f8459fb7b56ce1dadd7677'
-    db_url = f'https://api.notion.com/v1/databases/{db_id}/query'
-    pg_url = 'https://api.notion.com/v1/pages/'
-    hdrs = {
-            'Authorization'  : f'Bearer {tok}' ,
-            'Notion-Version' : '2022-06-28' ,
-            }
-
-no = Notion()
-
-class Todoist :
-    tok = get_tok('Todoist')
-    hdrs = {
-            'Authorization' : f'Bearer {tok}'
-            }
-    proj_id = None
-
-to = Todoist()
-
-class TodoistSection :
-    id = 'id'
-    name = 'name'
-    order = 'order'
-    project_id = 'project_id'
-
 ts = TodoistSection()
-tsd = rnsvoc(TodoistSection)
-
-class TodoistProject :
-    color = 'color'
-    comment_count = 'comment_count'
-    id = 'id'
-    is_favorite = 'is_favorite'
-    is_inbox_project = 'is_inbox_project'
-    is_shared = 'is_shared'
-    is_team_inbox = 'is_team_inbox'
-    name = 'name'
-    order = 'order'
-    parent_id = 'parent_id'
-    url = 'url'
-    view_style = 'view_style'
-
+tsd = rnsioac(TodoistSection)
 tp = TodoistProject()
-tpd = rnsvoc(TodoistProject)
+tpd = rnsioac(TodoistProject)
+no = Notion()
+to = Todoist()
 
 def get_txt_content_fr_notion_name(name) :
     ti = name['title']
@@ -174,12 +119,6 @@ def get_all_todoist_projects() :
         df[col] = [getattr(x , col) for x in secs]
     return df
 
-def get_daily_routine_project_id() :
-    df = get_all_todoist_projects()
-    msk = df[tp.name].eq('📆')
-    ind = df[msk].index[0]
-    return df.at[ind , tp.id]
-
 async def get_sections_async() :
     api = TodoistAPIAsync(to.tok)
     try :
@@ -187,18 +126,6 @@ async def get_sections_async() :
         return scs
     except Exception as error :
         print(error)
-
-def get_all_sections() :
-    secs = asyncio.run(get_sections_async())
-    df = pd.DataFrame()
-    for col in tsd :
-        df[col] = [getattr(x , col) for x in secs]
-    return df
-
-def del_sections(id_list) :
-    api = TodoistAPI(to.tok)
-    for id in id_list :
-        api.delete_section(id)
 
 def del_all_sections() :
     df = get_all_sections()
@@ -234,8 +161,11 @@ def make_tasks_with_the_indent(df , indent) :
         df.at[ind , c.par_id] = tsk.id
     return df
 
-def main() :
+def get_pgs(url , proxies = None) :
+    r = requests.get(url , headers = no.hdrs , proxies = proxies)
+    return str(r.json())
 
+def main() :
     pass
 
     ##
@@ -245,7 +175,6 @@ def main() :
             }
 
     if False :
-
         pass
 
         ##
@@ -264,26 +193,16 @@ def main() :
     df[c.url] = no.pg_url + df['id']
 
     ##
-    outmap = {
-            c.js : None
-            }
-
-    def get_pgs(url , proxies = None) :
-        r = requests.get(url , headers = no.hdrs , proxies = proxies)
-        return str(r.json())
-
-    ##
     if False :
-
         pass
 
         ##
         fu = partial(get_pgs , proxies = proxies)
 
-        df = dfap(df , fu , [c.url] , outmap)
+        df[c.js] = df[c.url].apply(lambda x : fu(x))
 
     ##
-    df = dfap(df , get_pgs , [c.url] , outmap)
+    df[c.js] = df[c.url].apply(lambda x : get_pgs(x))
 
     ##
     df1 = df.copy()
@@ -337,7 +256,7 @@ def main() :
     to.proj_id = get_daily_routine_project_id()
 
     ##
-    print('Todoit Project ID: ' + to.proj_id)
+    print('Todoist Project ID: ' + to.proj_id)
     assert to.proj_id is not None
 
     ##
@@ -349,7 +268,6 @@ def main() :
     ##
     df1[c.par_id] = None
 
-    ##
     for indnt in df1[c.indnt].unique().tolist() :
         df1 = make_tasks_with_the_indent(df1 , indnt)
 
@@ -361,62 +279,12 @@ if __name__ == "__main__" :
     print(f'{Path(__file__).name} Done!')
 
 ##
-if False :
 
+if False :
     pass
 
     ##
 
     ##
-    from pathlib import Path
-    import subprocess
-    from mirutil.files import read_json_file
-    from mirutil.auto_run import Conf
-    from giteasy import GitHubRepo
-
-
-    conf = Conf()
-
-    def make_venv(fp = Path('conf.json')) :
-        js = read_json_file(fp)
-
-        rp_url = js[conf.repo_url]
-        ghr = GitHubRepo(rp_url)
-
-        pyv = js[conf.python_version]
-
-        subprocess.run(['pyenv' , 'install' , '--skip-existing' , pyv])
-        subprocess.run(['pyenv' , 'virtualenv-delete' , '-f' , ghr.repo_name])
-        subprocess.run(['pyenv' , 'virtualenv' , pyv , ghr.repo_name])
-
-        print(ghr.repo_name)
-
-    def ret_dirn(fp = Path('conf.json')) :
-        from giteasy.github_releases import \
-            download_latest_release_of_public_github_repo
-
-        js = read_json_file(fp)
-
-        rp_url = js[conf.repo_url]
-        dirp = download_latest_release_of_public_github_repo(rp_url)
-        print(dirp.name)
-
-    def ret_module_2_run_name(fp = Path('conf.json')) :
-        js = read_json_file(fp)
-        print(js[conf.module_2_run])
 
     ##
-    rpu = 'https://github.com/imahdimir/make-day-plan-in-Todoist-fr-notion'
-    from giteasy.github_releases import \
-        download_latest_release_of_public_github_repo
-
-
-    dirp = download_latest_release_of_public_github_repo(rpu)
-
-    ##
-    js = read_json_file('conf.json')
-    rp_url = js[conf.repo_url]
-    dirp = download_latest_release_of_public_github_repo(rp_url)
-    print(dirp)
-
-##

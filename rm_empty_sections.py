@@ -6,39 +6,21 @@ import asyncio
 from pathlib import Path
 
 import pandas as pd
-from mirutil.classs import return_not_special_variables_of_class as rnsvoc
 from todoist_api_python.api_async import TodoistAPIAsync
 
-from day_plan import del_sections
-from day_plan import get_all_sections
-from day_plan import Todoist
-from day_plan import ts
-from day_plan import get_daily_routine_project_id
+from models import Todoist
+from models import TodoistSection
+from models import TodoistTask
+from util import del_sections
+from util import get_all_sections
+from util import get_daily_routine_project_id
+from util import ret_not_special_items_of_a_class as rnsioac
 
 
 to = Todoist()
-
-class TodoistTask :
-    assignee_id = 'assignee_id'
-    assigner_id = 'assigner_id'
-    comment_count = 'comment_count'
-    is_completed = 'is_completed'
-    content = 'content'
-    created_at = 'created_at'
-    creator_id = 'creator_id'
-    description = 'description'
-    due = 'due'
-    id = 'id'
-    labels = 'labels'
-    order = 'order'
-    parent_id = 'parent_id'
-    priority = 'priority'
-    project_id = 'project_id'
-    section_id = 'section_id'
-    url = 'url'
-
 tt = TodoistTask()
-ttd = rnsvoc(TodoistTask)
+ttd = rnsioac(TodoistTask)
+ts = TodoistSection()
 
 async def get_all_tasks_async() :
     api = TodoistAPIAsync(to.tok)
@@ -90,6 +72,7 @@ if __name__ == '__main__' :
     print(f'{Path(__file__).name} Done!')
 
 ##
+
 if False :
     pass
 

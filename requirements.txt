@@ -1,4 +1,4 @@
-pandas~=1.5.1
-requests~=2.28.1
-mirutil~=16.4.0
-attrs~=22.1.0
+requests
+todoist-api-python~=2.0.2
+pandas
+mtok
