@@ -30,6 +30,8 @@ tpd = rnsioac(TodoistProject)
 no = Notion()
 to = Todoist()
 
+api = TodoistAPI(to.tok)
+
 def get_txt_content_fr_notion_name(name) :
     ti = name['title']
     os = ''
@@ -118,22 +120,16 @@ def del_all_sections() :
     del_sections(df['id'])
 
 def make_sections(df) :
-    api = TodoistAPI(to.tok)
-
     for sec in df[c.sec].unique().tolist() :
         ose = api.add_section(sec , to.proj_id)
-
         msk = df[c.sec].eq(sec)
         df.loc[msk , c.sec_id] = ose.id
-
     return df
 
 def make_tasks_with_the_indent(df , indent) :
     msk = df[c.indnt].eq(indent)
     df.loc[msk , c.par_id] = df[c.par_id].ffill()
     _df = df[msk]
-
-    api = TodoistAPI(to.tok)
     for ind , row in _df.iterrows() :
         tsk = api.add_task(content = row[c.cnt] ,
                            section_id = row[c.sec_id] ,
@@ -146,6 +142,15 @@ def make_tasks_with_the_indent(df , indent) :
 def get_pgs(url , proxies = None) :
     r = requests.get(url , headers = no.hdrs , proxies = proxies)
     return str(r.json())
+
+def delete_a_todoist_project(project_id) :
+    api.delete_project(project_id)
+    print(f"project with id=={project_id} got deleted")
+
+def create_daily_routine_project_ret_id() :
+    proj = api.add_project('📆' , color = 'red')
+    print(f'Daily Routine Project is created with id=={proj.id}')
+    return proj.id
 
 def main() :
     pass
@@ -237,15 +242,18 @@ def main() :
     ##
     to.proj_id = get_daily_routine_project_id()
 
-    ##
     print('Todoist Project ID: ' + to.proj_id)
     assert to.proj_id is not None
 
     ##
-    del_all_sections()
+    delete_a_todoist_project(to.proj_id)
+
+    ##
+    to.proj_id = create_daily_routine_project_ret_id()
 
     ##
     df1 = make_sections(df1)
+    print('All new sections created.')
 
     ##
     df1[c.par_id] = None
