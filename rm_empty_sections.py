@@ -16,7 +16,6 @@ from util import get_all_sections
 from util import get_daily_routine_project_id
 from util import ret_not_special_items_of_a_class as rnsioac
 
-
 to = Todoist()
 tt = TodoistTask()
 ttd = rnsioac(TodoistTask)
@@ -44,9 +43,21 @@ def main() :
     dt = get_all_tasks()
 
     ##
-    to.proj_id = get_daily_routine_project_id()
+    if False :
+        pass
+
+        ##
+        to.proj_id = get_daily_routine_project_id()
 
     ##
+    try :
+        to.proj_id = get_daily_routine_project_id()
+
+    # if the daily routine project does not exist
+    except IndexError :
+        return
+
+        ##
     msk = ds[ts.project_id].eq(to.proj_id)
 
     print('All sections count in the project: ' , len(msk[msk]))
