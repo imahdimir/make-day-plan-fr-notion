@@ -53,7 +53,7 @@ def main() :
     try :
         to.proj_id = get_daily_routine_project_id()
 
-    # if the daily routine project does not exist
+    # except the daily routine project does not exist
     except IndexError :
         return
 
