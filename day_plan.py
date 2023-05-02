@@ -6,6 +6,7 @@ from functools import partial
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 import requests
 from todoist_api_python.api import TodoistAPI
 
@@ -18,8 +19,8 @@ from models import Types
 from util import del_sections
 from util import get_all_sections
 from util import get_daily_routine_project_id
+from util import Params
 from util import ret_not_special_items_of_a_class as rnsioac
-
 
 c = ColName()
 ty = Types()
@@ -31,6 +32,8 @@ no = Notion()
 to = Todoist()
 
 api = TodoistAPI(to.tok)
+
+pa = Params()
 
 def get_txt_content_fr_notion_name(name) :
     ti = name['title']
@@ -47,6 +50,9 @@ def get_select_col_val(x) :
 
 def get_num_col_val(x) :
     return x['number']
+
+def get_checkbox_col_val(x) :
+    return x['checkbox']
 
 def insert_section_row_before_first_ocur(sec , df) :
     df = df.reset_index(drop = True)
@@ -66,8 +72,9 @@ def insert_section_row_before_first_ocur(sec , df) :
 
     return pd.concat([_df0 , _df , _df1])
 
-def indent_fillna(df) :
+def fix_indents(df) :
     df[c.indnt] = df[c.indnt].fillna(1)
+    df[c.indnt] = df[c.indnt].astype(int)
     return df
 
 def add_time_to_cnt(df) :
@@ -121,6 +128,9 @@ def del_all_sections() :
 
 def make_sections(df) :
     for sec in df[c.sec].unique().tolist() :
+        if pd.isna(sec) :
+            continue
+
         ose = api.add_section(sec , to.proj_id)
         msk = df[c.sec].eq(sec)
         df.loc[msk , c.sec_id] = ose.id
@@ -128,15 +138,23 @@ def make_sections(df) :
 
 def make_tasks_with_the_indent(df , indent) :
     msk = df[c.indnt].eq(indent)
+
     df.loc[msk , c.par_id] = df[c.par_id].ffill()
+
     _df = df[msk]
+
     for ind , row in _df.iterrows() :
+        sid = row[c.sec_id] if not pd.isna(row[c.sec_id]) else None
+
         tsk = api.add_task(content = row[c.cnt] ,
-                           section_id = row[c.sec_id] ,
+                           project_id = to.proj_id ,
+                           section_id = sid ,
                            priority = 5 - int(row[c.pri]) ,
                            parent_id = row[c.par_id] ,
                            labels = row[c.labels])
+
         df.at[ind , c.par_id] = tsk.id
+
     return df
 
 def get_pgs(url , proxies = None) :
@@ -145,12 +163,39 @@ def get_pgs(url , proxies = None) :
 
 def delete_a_todoist_project(project_id) :
     api.delete_project(project_id)
-    print(f"project with id=={project_id} got deleted")
+    print(f"project with id == {project_id} got deleted")
 
 def create_daily_routine_project_ret_id() :
-    proj = api.add_project('📆' , color = 'red')
-    print(f'Daily Routine Project is created with id=={proj.id}')
+    proj = api.add_project(pa.routin , color = 'red')
+    print(f'{pa.routin} Project is created with id == {proj.id}')
     return proj.id
+
+def find_next_not_sub_task_index(subdf , indent) :
+    df = subdf
+    df['h'] = df[c.indnt].le(indent)
+    return df['h'].idxmax()
+
+def propagate_exculsion_and_drop_final_exculded_tasks(df) :
+    # reset index
+    df = df.reset_index(drop = True)
+
+    # propagate exculde to sub-tasks
+    for indx , row in df.iloc[:-1].iterrows() :
+        if not row[c.excl] :
+            continue
+
+        nidx = find_next_not_sub_task_index(df[indx + 1 :] , row[c.indnt])
+
+        msk_range = pd.RangeIndex(start = indx , stop = nidx)
+
+        msk = df.index.isin(msk_range)
+
+        df.loc[msk , c.excl] = True
+
+    # drop exculded tasks
+    df = df[~ df[c.excl]]
+
+    return df
 
 def main() :
     pass
@@ -186,14 +231,14 @@ def main() :
         ##
         fu = partial(get_pgs , proxies = proxies)
 
-        df[c.js] = df[c.url].apply(lambda x : fu(x))
+        df[c.jsn] = df[c.url].apply(lambda x : fu(x))
 
     ##
-    df[c.js] = df[c.url].apply(lambda x : get_pgs(x))
+    df[c.jsn] = df[c.url].apply(lambda x : get_pgs(x))
 
     ##
     df1 = df.copy()
-    df1 = df1[c.js].apply(lambda x : pd.Series(eval(x)))
+    df1 = df1[c.jsn].apply(lambda x : pd.Series(eval(x)))
     df1 = df1[['id' , 'properties']]
 
     df1 = df1['properties'].apply(pd.Series)
@@ -208,6 +253,7 @@ def main() :
             c.pri   : get_select_col_val ,
             c.tty   : get_select_col_val ,
             c.cnt   : get_txt_content_fr_notion_name ,
+            c.excl  : get_checkbox_col_val
             }
 
     for col , func in apply_dct.items() :
@@ -217,6 +263,9 @@ def main() :
     df1[[c.secn , c.sec]] = df1[c.sec].str.split('-' , expand = True)
 
     ##
+    msk = df1[c.secn].isna()
+    df1.loc[msk , c.secn] = -1
+
     df1[c.secn] = df1[c.secn].astype(int)
 
     ##
@@ -225,7 +274,7 @@ def main() :
     df1 = df1.drop(columns = [c.secn , c.srt])
 
     ##
-    df1 = indent_fillna(df1)
+    df1 = fix_indents(df1)
 
     ##
     df1 = add_time_to_cnt(df1)
@@ -253,12 +302,15 @@ def main() :
 
     ##
     df1 = make_sections(df1)
-    print('All new sections created.')
+    print('All sections created.')
+
+    ##
+    df1 = propagate_exculsion_and_drop_final_exculded_tasks(df1)
 
     ##
     df1[c.par_id] = None
 
-    for indnt in df1[c.indnt].unique().tolist() :
+    for indnt in np.sort(df1[c.indnt].unique()) :
         df1 = make_tasks_with_the_indent(df1 , indnt)
 
 ##

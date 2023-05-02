@@ -4,10 +4,9 @@
 
 from mtok import get_token as get_tok
 
-
 class ColName :
     url = 'url'
-    js = 'json'
+    jsn = 'json'
     th = 'T-[h]'
     tm = 'T-[m]'
     indnt = 'INDENT'
@@ -21,6 +20,7 @@ class ColName :
     sec_id = 'sec_id'
     par_id = 'par_id'
     labels = 'labels'
+    excl = 'Exclude'
 
 class TodoistTask :
     assignee_id = 'assignee_id'
@@ -67,7 +67,7 @@ class Types :
 
 class Notion :
     tok = get_tok('Notion')
-    db_id = '60c2cf7059f8459fb7b56ce1dadd7677'
+    db_id = get_tok('Notion_Day_Routine_db_id')
     db_url = f'https://api.notion.com/v1/databases/{db_id}/query'
     pg_url = 'https://api.notion.com/v1/pages/'
     hdrs = {
