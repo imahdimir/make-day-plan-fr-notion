@@ -289,13 +289,20 @@ def main() :
     df1 = add_t_type_to_cnt(df1)
 
     ##
-    to.proj_id = get_daily_routine_project_id()
+    if False :
+        pass
 
-    print('Todoist Project ID: ' + to.proj_id)
-    assert to.proj_id is not None
+        ##
+        to.proj_id = get_daily_routine_project_id()
 
     ##
-    delete_a_todoist_project(to.proj_id)
+    try :
+        to.proj_id = get_daily_routine_project_id()
+        delete_a_todoist_project(to.proj_id)
+
+    # except the daily routine project does not exist
+    except IndexError :
+        pass
 
     ##
     to.proj_id = create_daily_routine_project_ret_id()
