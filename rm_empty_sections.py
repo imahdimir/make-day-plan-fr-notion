@@ -37,10 +37,16 @@ def main() :
     pass
 
     ##
-    ds = get_all_sections()
+    dfs = get_all_sections()
 
     ##
-    dt = get_all_tasks()
+    dft = get_all_tasks()
+
+    ##
+    inbox_id = '2266805950'
+
+    msk = dft[tt.project_id].eq(inbox_id)
+    dft = dft[~ msk]
 
     ##
     if False :
@@ -57,23 +63,23 @@ def main() :
     except IndexError :
         return
 
-        ##
-    msk = ds[ts.project_id].eq(to.proj_id)
+    ##
+    msk = dfs[ts.project_id].eq(to.proj_id)
 
     print('All sections count in the project: ' , len(msk[msk]))
 
     ##
-    msk &= ~ ds[ts.id].isin(dt[tt.section_id])
+    msk &= ~ dfs[ts.id].isin(dft[tt.section_id])
 
     print('Empty sections: ' , len(msk[msk]))
 
     ##
-    msk &= ~ ds[ts.name].str.contains('📌')
+    msk &= ~ dfs[ts.name].str.contains('📌')
 
     print('Not pinned (!📌) and empty sections: ' , len(msk[msk]))
 
     ##
-    del_sections(ds.loc[msk , ts.id])
+    del_sections(dfs.loc[msk , ts.id])
 
 ##
 
