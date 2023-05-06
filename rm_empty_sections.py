@@ -2,19 +2,17 @@
 
     """
 
-import asyncio
+import datetime as dt
 from pathlib import Path
 
-import pandas as pd
-import time
-import datetime as dt
-import pytz
-
+from models import ColName
 from models import Todoist
 from models import TodoistSection
-from models import TodoistTask , ColName
+from models import TodoistTask
 from util import del_sections
-from util import get_all_sections , get_all_tasks , Params
+from util import get_all_sections
+from util import get_all_tasks
+from util import Params
 
 to = Todoist()
 tt = TodoistTask()
@@ -42,35 +40,119 @@ def find_next_reset_datetime() :
 
     return rrdt
 
+def format_max_time(df) :
+    df[c.secmt] = df[c.secmt].str.upper()
+    df[c.secmt] = df[c.secmt].str.replace('\s' , '' , regex = True)
+    df[c.secmt] = df[c.secmt].str.replace(r'(AM|PM)' , r' \1' , regex = True)
+    return df
+
+def find_max_time(df) :
+    pat = '([1-9]|10|11|12) (AM|PM)'
+
+    msk = df[c.secmt].str.fullmatch(pat)
+    msk = msk.fillna(False)
+
+    fu = lambda x : dt.datetime.strptime(x , '%I %p').time()
+    df.loc[msk , c.secmt] = df.loc[msk , c.secmt].apply(fu)
+
+    pat = '([1-9]|10|11|12):\d\d (AM|PM)'
+
+    msk = df[c.secmt].str.fullmatch(pat)
+    msk = msk.fillna(False)
+
+    fu = lambda x : dt.datetime.strptime(x , '%I:%M %p').time()
+    df.loc[msk , c.secmt] = df.loc[msk , c.secmt].apply(fu)
+
+    return df
+
+def find_max_datetime(secmt , rrdt) :
+    if secmt is None :
+        return None
+
+    elif rrdt.time() > secmt :
+        secmt = dt.datetime.combine(rrdt.date() , secmt)
+
+    else :
+        scdt = rrdt.date() + dt.timedelta(days = -1)
+        secmt = dt.datetime.combine(scdt , secmt)
+
+    return secmt
+
+def add_datetime_to_sections(df , rrdt) :
+    df = format_max_time(df)
+    df = find_max_time(df)
+
+    df[c.secmt] = df[c.secmt].apply(lambda x : find_max_datetime(x , rrdt))
+
+    fu = lambda x : x + dt.timedelta(minutes = 5) if x is not None else None
+    df[c.secmt] = df[c.secmt].apply(fu)
+
+    return df
+
+def make_rm_section_based_on_time(df) :
+    # mark passed sections true also those without max time (None)
+    df['now'] = dt.datetime.now(pa.tz)
+    df['now'] = df['now'].dt.tz_localize(None)
+    df['now'] = df['now'].astype('datetime64[ns]')
+
+    df[c.rm_sec] = df[c.secmt].lt(df['now'])
+
+    msk = df[c.secmt].isnull()
+    df.loc[msk , c.rm_sec] = True
+
+    df = df.drop(columns = ['now'])
+
+    return df
+
+def adjust_rm_section_based_on_having_no_tasks(df) :
+    # keep only routine project sections
+    msk = df[ts.project_id].eq(pa.routine_proj_id)
+    df = df[msk]
+
+    dft = get_all_tasks()
+
+    # mark sections with no tasks as true
+    msk = ~ df[ts.id].isin(dft[tt.section_id])
+
+    df[c.rm_sec] &= msk
+
+    return df
+
+def adj_rm_sec_based_on_not_pinned_sections(df) :
+    msk = ~ df[ts.name].str.contains('📌')
+    df[c.rm_sec] &= msk
+    return df
+
 def main() :
     pass
 
     ##
+    # get all availabe sections in the routine project
     dfs = get_all_sections()
 
     ##
+    # split max time of section from its name if exists
     dfs = split_max_time_of_section_from_its_name(dfs)
 
     ##
-    dft = get_all_tasks()
+    # find next reset datetime
+    rrdt = find_next_reset_datetime()
 
     ##
-    msk = dfs[ts.project_id].eq(pa.routine_proj_id)
-
-    print('All sections count in the project: ' , len(msk[msk]))
-
-    ##
-    msk &= ~ dfs[ts.id].isin(dft[tt.section_id])
-
-    print('Empty sections: ' , len(msk[msk]))
+    # add date to max time of sections
+    df = add_datetime_to_sections(dfs , rrdt)
 
     ##
-    msk &= ~ dfs[ts.name].str.contains('📌')
-
-    print('Not pinned (!📌) and empty sections: ' , len(msk[msk]))
+    df = make_rm_section_based_on_time(df)
 
     ##
-    del_sections(dfs.loc[msk , ts.id])
+    df = adjust_rm_section_based_on_having_no_tasks(df)
+
+    ##
+    df = adj_rm_sec_based_on_not_pinned_sections(df)
+
+    ##
+    del_sections(dfs.loc[df[c.rm_sec] , ts.id])
 
 ##
 
@@ -85,8 +167,9 @@ if False :
     pass
 
     ##
-    st1 = '6 AM'
-    st2 = '6:00 AM'
-    dt.datetime.strptime(st2 , '%I %p').time()
+
+    ##
+
+    ##
 
     ##

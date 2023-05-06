@@ -22,6 +22,7 @@ class ColName :
     par_id = 'par_id'
     labels = 'labels'
     excl = 'Exclude'
+    rm_sec = 'remove_section'
 
 class TodoistTask :
     assignee_id = 'assignee_id'
