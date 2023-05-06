@@ -12,11 +12,12 @@ class ColName :
     indnt = 'INDENT'
     srt = 'sort'
     sec = 'section'
+    secn = 'secn'
+    secmt = 'sec_max_time'
     pri = 'PRIORITY'
     tty = 'T Type'
     cnt = 'CONTENT'
     ty = "TYPE"
-    secn = 'secn'
     sec_id = 'sec_id'
     par_id = 'par_id'
     labels = 'labels'
@@ -80,4 +81,3 @@ class Todoist :
     hdrs = {
             'Authorization' : f'Bearer {tok}'
             }
-    proj_id = None

@@ -2,11 +2,12 @@
 
     """
 
+import uuid
 from functools import partial
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import requests
 from todoist_api_python.api import TodoistAPI
 
@@ -15,16 +16,18 @@ from models import Notion
 from models import Todoist
 from models import TodoistProject
 from models import TodoistSection
+from models import TodoistTask
 from models import Types
 from util import del_sections
 from util import get_all_sections
-from util import get_daily_routine_project_id
+from util import get_all_tasks
 from util import Params
 from util import ret_not_special_items_of_a_class as rnsioac
 
 c = ColName()
 ty = Types()
 ts = TodoistSection()
+tsk = TodoistTask()
 tsd = rnsioac(TodoistSection)
 tp = TodoistProject()
 tpd = rnsioac(TodoistProject)
@@ -53,24 +56,6 @@ def get_num_col_val(x) :
 
 def get_checkbox_col_val(x) :
     return x['checkbox']
-
-def insert_section_row_before_first_ocur(sec , df) :
-    df = df.reset_index(drop = True)
-
-    print(sec)
-    msk = df[c.sec].eq(sec)
-    y = msk[msk].idxmin()
-
-    _df0 = df.loc[: y].iloc[:-1]
-
-    _df = pd.DataFrame({
-            c.ty  : [ty.sec] ,
-            c.cnt : [sec]
-            })
-
-    _df1 = df.loc[y :]
-
-    return pd.concat([_df0 , _df , _df1])
 
 def fix_indents(df) :
     df[c.indnt] = df[c.indnt].fillna(1)
@@ -118,22 +103,16 @@ def make_labels_list(df) :
         df[c.labels] = df[c.labels] + df[col].apply(_fu)
     return df
 
-def del_all_sections() :
-    df = get_all_sections()
-
-    msk = df['project_id'].eq(to.proj_id)
-    df = df[msk]
-
-    del_sections(df['id'])
-
 def make_sections(df) :
     for sec in df[c.sec].unique().tolist() :
         if pd.isna(sec) :
             continue
 
-        ose = api.add_section(sec , to.proj_id)
+        ose = api.add_section(sec , pa.routine_proj_id)
+
         msk = df[c.sec].eq(sec)
         df.loc[msk , c.sec_id] = ose.id
+
     return df
 
 def make_tasks_with_the_indent(df , indent) :
@@ -146,29 +125,20 @@ def make_tasks_with_the_indent(df , indent) :
     for ind , row in _df.iterrows() :
         sid = row[c.sec_id] if not pd.isna(row[c.sec_id]) else None
 
-        tsk = api.add_task(content = row[c.cnt] ,
-                           project_id = to.proj_id ,
-                           section_id = sid ,
-                           priority = 5 - int(row[c.pri]) ,
-                           parent_id = row[c.par_id] ,
-                           labels = row[c.labels])
+        tska = api.add_task(content = row[c.cnt] ,
+                            project_id = pa.routine_proj_id ,
+                            section_id = sid ,
+                            priority = 5 - int(row[c.pri]) ,
+                            parent_id = row[c.par_id] ,
+                            labels = row[c.labels])
 
-        df.at[ind , c.par_id] = tsk.id
+        df.at[ind , c.par_id] = tska.id
 
     return df
 
 def get_pgs(url , proxies = None) :
     r = requests.get(url , headers = no.hdrs , proxies = proxies)
     return str(r.json())
-
-def delete_a_todoist_project(project_id) :
-    api.delete_project(project_id)
-    print(f"project with id == {project_id} got deleted")
-
-def create_daily_routine_project_ret_id() :
-    proj = api.add_project(pa.routin , color = 'red')
-    print(f'{pa.routin} Project is created with id == {proj.id}')
-    return proj.id
 
 def find_next_not_sub_task_index(subdf , indent) :
     df = subdf
@@ -197,10 +167,50 @@ def propagate_exculsion_and_drop_final_exculded_tasks(df) :
 
     return df
 
-def main() :
-    pass
+def filter_tasks_to_take_out_from_sections() :
+    # get all tasks
+    df = get_all_tasks()
 
-    ##
+    # keep only tasks in routine project
+    msk = df[tsk.project_id].eq(pa.routine_proj_id)
+    df = df[msk]
+
+    # keep those with section_id == those in some section
+    msk = df[tsk.section_id].notna()
+    df = df[msk]
+
+    # keep only level 1 tasks
+    msk = df[tsk.parent_id].isna()
+    df = df[msk]
+
+    return df
+
+def move_a_task_under_a_section_out_to_routine_project(task_id) :
+    muuid = uuid.uuid4()
+    dta = {
+            "commands" : r'[ {"type": "item_move", "uuid": ' + f'"{muuid}" ,' + r' "args": { "id": ' + f' "{task_id}", ' + r' "project_id": ' + f' "{pa.routine_proj_id}" ' + r'}}]'
+            }
+    requests.post('https://api.todoist.com/sync/v9/sync' ,
+                  headers = to.hdrs ,
+                  data = dta)
+
+def move_all_tasks_out_of_sections() :
+    """move all not done tasks out of sections to routine project body"""
+
+    df = filter_tasks_to_take_out_from_sections()
+    for indx , row in df.iterrows() :
+        move_a_task_under_a_section_out_to_routine_project(row[tsk.id])
+
+def rm_all_section_in_routine_project() :
+    df = get_all_sections()
+
+    # keep only section in the day routine project
+    msk = df[ts.project_id].eq(pa.routine_proj_id)
+    df = df[msk]
+
+    del_sections(df[ts.id])
+
+def get_routine_db() :
     proxies = {
             'http'  : '172.31.0.235:8080' ,
             'https' : '172.31.0.235:8080' ,
@@ -209,41 +219,38 @@ def main() :
     if False :
         pass
 
-        ##
         r = requests.post(no.db_url , headers = no.hdrs , proxies = proxies)
 
-    ##
     r = requests.post(no.db_url , headers = no.hdrs)
 
-    ##
     secs = r.json()['results']
     df = pd.DataFrame(secs)
 
-    ##
     df = df[['id']]
     df['id'] = df['id'].str.replace('-' , '')
     df[c.url] = no.pg_url + df['id']
 
-    ##
+    return df
+
+def get_all_pages_in_routine_db_from_notion(df) :
     if False :
         pass
 
-        ##
         fu = partial(get_pgs , proxies = proxies)
 
         df[c.jsn] = df[c.url].apply(lambda x : fu(x))
 
-    ##
     df[c.jsn] = df[c.url].apply(lambda x : get_pgs(x))
 
-    ##
     df1 = df.copy()
     df1 = df1[c.jsn].apply(lambda x : pd.Series(eval(x)))
     df1 = df1[['id' , 'properties']]
 
     df1 = df1['properties'].apply(pd.Series)
 
-    ##
+    return df1
+
+def format_page_properties(df) :
     apply_dct = {
             c.th    : get_num_col_val ,
             c.tm    : get_num_col_val ,
@@ -257,68 +264,86 @@ def main() :
             }
 
     for col , func in apply_dct.items() :
-        df1[col] = df1[col].apply(func)
+        df[col] = df[col].apply(func)
+
+    return df
+
+def split_section_order_and_section_name(df) :
+    new_cols = [c.secn , c.sec]
+    df[new_cols] = df[c.sec].str.split('-' , expand = True , n = 1)
+
+    return df
+
+def fix_section_order(df) :
+    msk = df[c.secn].isna()
+    df.loc[msk , c.secn] = -1
+
+    df[c.secn] = df[c.secn].astype(int)
+
+    return df
+
+def sort_tasks_based_on_section_and_uneder_section_sort(df) :
+    df = df.sort_values([c.secn , c.srt] , ascending = True)
+
+    df = df.drop(columns = [c.secn , c.srt])
+
+    return df
+
+def fix_cols(df) :
+    df = fix_indents(df)
+
+    df = add_time_to_cnt(df)
+
+    df = fillna_priority(df)
+
+    df = make_labels_list(df)
+
+    df = add_t_type_to_cnt(df)
+
+    return df
+
+def main() :
+    pass
 
     ##
-    df1[[c.secn , c.sec]] = df1[c.sec].str.split('-' , expand = True)
+    move_all_tasks_out_of_sections()
 
     ##
-    msk = df1[c.secn].isna()
-    df1.loc[msk , c.secn] = -1
-
-    df1[c.secn] = df1[c.secn].astype(int)
+    rm_all_section_in_routine_project()
 
     ##
-    df1 = df1.sort_values([c.secn , c.srt] , ascending = True)
-
-    df1 = df1.drop(columns = [c.secn , c.srt])
+    df = get_routine_db()
 
     ##
-    df1 = fix_indents(df1)
+    dfa = get_all_pages_in_routine_db_from_notion(df)
 
     ##
-    df1 = add_time_to_cnt(df1)
+    dfa = format_page_properties(dfa)
 
     ##
-    df1 = fillna_priority(df1)
+    dfa = split_section_order_and_section_name(dfa)
 
     ##
-    df1 = make_labels_list(df1)
+    dfa = fix_section_order(dfa)
 
     ##
-    df1 = add_t_type_to_cnt(df1)
+    dfa = sort_tasks_based_on_section_and_uneder_section_sort(dfa)
 
     ##
-    if False :
-        pass
-
-        ##
-        to.proj_id = get_daily_routine_project_id()
+    dfa = fix_cols(dfa)
 
     ##
-    try :
-        to.proj_id = get_daily_routine_project_id()
-        delete_a_todoist_project(to.proj_id)
-
-    # except the daily routine project does not exist
-    except IndexError :
-        pass
-
-    ##
-    to.proj_id = create_daily_routine_project_ret_id()
-
-    ##
-    df1 = make_sections(df1)
+    dfa = make_sections(dfa)
     print('All sections created.')
 
     ##
-    df1 = propagate_exculsion_and_drop_final_exculded_tasks(df1)
+    dfa = propagate_exculsion_and_drop_final_exculded_tasks(dfa)
 
     ##
-    df1[c.par_id] = None
+    dfa[c.par_id] = None
 
-    for indnt in np.sort(df1[c.indnt].unique()) :
-        df1 = make_tasks_with_the_indent(df1 , indnt)
+    for indnt in np.sort(dfa[c.indnt].unique()) :
+        dfa = make_tasks_with_the_indent(dfa , indnt)
 
 ##
 
