@@ -152,7 +152,7 @@ def main() :
     df = adj_rm_sec_based_on_not_pinned_sections(df)
 
     ##
-    del_sections(dfs.loc[df[c.rm_sec] , ts.id])
+    del_sections(df.loc[df[c.rm_sec] , ts.id])
 
 ##
 
