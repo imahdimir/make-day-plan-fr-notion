@@ -105,10 +105,6 @@ def make_rm_section_based_on_time(df) :
     return df
 
 def adjust_rm_section_based_on_having_no_tasks(df) :
-    # keep only routine project sections
-    msk = df[ts.project_id].eq(pa.routine_proj_id)
-    df = df[msk]
-
     dft = get_all_tasks()
 
     # mark sections with no tasks as true
@@ -129,6 +125,11 @@ def main() :
     ##
     # get all availabe sections in the routine project
     dfs = get_all_sections()
+
+    ##
+    # keep only routine project sections
+    msk = dfs[ts.project_id].eq(pa.routine_proj_id)
+    dfs = dfs[msk]
 
     ##
     # split max time of section from its name if exists
