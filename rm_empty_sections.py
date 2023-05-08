@@ -144,15 +144,19 @@ def main() :
     df = add_datetime_to_sections(dfs , rrdt)
 
     ##
+    # find sections that their max time has passed
     df = make_rm_section_based_on_time(df)
 
     ##
+    # find empty sections
     df = adjust_rm_section_based_on_having_no_tasks(df)
 
     ##
+    # keep only not pinned sections
     df = adj_rm_sec_based_on_not_pinned_sections(df)
 
     ##
+    # delete filtered sections
     del_sections(df.loc[df[c.rm_sec] , ts.id])
 
 ##
