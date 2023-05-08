@@ -144,7 +144,7 @@ def main() :
     df = add_datetime_to_sections(dfs , rrdt)
 
     ##
-    # find sections that their max time has passed
+    # find sections that their max time has passed, or have no max time
     df = make_rm_section_based_on_time(df)
 
     ##
