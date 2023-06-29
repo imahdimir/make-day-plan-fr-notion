@@ -278,7 +278,7 @@ def fix_section_order(df) :
     msk = df[c.secn].isna()
     df.loc[msk , c.secn] = -1
 
-    df[c.secn] = df[c.secn].astype(int)
+    df[c.secn] = df[c.secn].astype(float)
 
     return df
 
