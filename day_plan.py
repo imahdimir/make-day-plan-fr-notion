@@ -62,7 +62,7 @@ def fix_indents(df) :
     df[c.indnt] = df[c.indnt].astype(int)
     return df
 
-def add_time_to_cnt(df) :
+def add_time_to_cont(df) :
     _df = df.copy()
 
     msk = df[c.th].notna()
@@ -70,12 +70,22 @@ def add_time_to_cnt(df) :
 
     _df[[c.th , c.tm]] = _df[[c.th , c.tm]].fillna(0)
 
+    msk1 = df[c.tm].lt(10)
+    msk1 &= msk
+
+    _df.loc[msk1 , c.tm] = '0' + _df.loc[msk1 , c.tm].astype(int).astype(str)
+
+    msk2 = df[c.tm].ge(10)
+    msk2 &= msk
+    _df.loc[msk2 , c.tm] = _df.loc[msk2 , c.tm].astype(int).astype(str)
+
     h = _df.loc[msk , c.th].astype(int).astype(str)
-    m = _df.loc[msk , c.tm].astype(int).astype(str)
+    m = _df.loc[msk , c.tm].astype(str)
 
     df.loc[msk , c.cnt] = df.loc[msk , c.cnt] + ' - ***' + h + ':' + m + '***'
 
     df = df.drop(columns = [c.th , c.tm])
+
     return df
 
 def add_t_type_to_cnt(df) :
@@ -104,7 +114,9 @@ def make_labels_list(df) :
     return df
 
 def make_sections(df) :
+    """ Make sections and get their ids """
     for sec in df[c.sec].unique().tolist() :
+
         if pd.isna(sec) :
             continue
 
@@ -198,10 +210,10 @@ def move_all_tasks_out_of_sections() :
     """move all not done tasks out of sections to routine project body"""
 
     df = filter_tasks_to_take_out_from_sections()
-    for indx , row in df.iterrows() :
-        move_a_task_under_a_section_out_to_routine_project(row[tsk.id])
+    for ind , ro in df.iterrows() :
+        move_a_task_under_a_section_out_to_routine_project(ro[tsk.id])
 
-def rm_all_section_in_routine_project() :
+def rm_all_sections_in_the_routine_proj() :
     df = get_all_sections()
 
     # keep only section in the day routine project
@@ -210,7 +222,7 @@ def rm_all_section_in_routine_project() :
 
     del_sections(df[ts.id])
 
-def get_routine_db() :
+def get_the_routine_fr_notion() :
     proxies = {
             'http'  : '172.31.0.235:8080' ,
             'https' : '172.31.0.235:8080' ,
@@ -242,13 +254,12 @@ def get_all_pages_in_routine_db_from_notion(df) :
 
     df[c.jsn] = df[c.url].apply(lambda x : get_pgs(x))
 
-    df1 = df.copy()
-    df1 = df1[c.jsn].apply(lambda x : pd.Series(eval(x)))
-    df1 = df1[['id' , 'properties']]
+    df = df[c.jsn].apply(lambda x : pd.Series(eval(x)))
+    df = df[['id' , 'properties']]
 
-    df1 = df1['properties'].apply(pd.Series)
+    df = df['properties'].apply(pd.Series)
 
-    return df1
+    return df
 
 def format_page_properties(df) :
     apply_dct = {
@@ -272,34 +283,27 @@ def split_section_order_and_section_name(df) :
     new_cols = [c.secn , c.sec]
     df[new_cols] = df[c.sec].str.split('-' , expand = True , n = 1)
 
+    df[c.secn] = df[c.secn].str.strip()
+    df[c.sec] = df[c.sec].str.strip()
+
     return df
 
 def fix_section_order(df) :
     msk = df[c.secn].isna()
-    df.loc[msk , c.secn] = -1
-
-    df[c.secn] = df[c.secn].astype(float)
-
+    df.loc[msk , c.secn] = 0
     return df
 
-def sort_tasks_based_on_section_and_uneder_section_sort(df) :
+def sort_tasks_based_on_section_and_sort(df) :
     df = df.sort_values([c.secn , c.srt] , ascending = True)
-
     df = df.drop(columns = [c.secn , c.srt])
-
     return df
 
 def fix_cols(df) :
     df = fix_indents(df)
-
-    df = add_time_to_cnt(df)
-
+    df = add_time_to_cont(df)
     df = fillna_priority(df)
-
     df = make_labels_list(df)
-
     df = add_t_type_to_cnt(df)
-
     return df
 
 def main() :
@@ -309,41 +313,41 @@ def main() :
     move_all_tasks_out_of_sections()
 
     ##
-    rm_all_section_in_routine_project()
+    rm_all_sections_in_the_routine_proj()
 
     ##
-    df = get_routine_db()
+    df_a = get_the_routine_fr_notion()
 
     ##
-    dfa = get_all_pages_in_routine_db_from_notion(df)
+    df = get_all_pages_in_routine_db_from_notion(df_a)
 
     ##
-    dfa = format_page_properties(dfa)
+    df = format_page_properties(df)
 
     ##
-    dfa = split_section_order_and_section_name(dfa)
+    df = split_section_order_and_section_name(df)
 
     ##
-    dfa = fix_section_order(dfa)
+    df = fix_section_order(df)
 
     ##
-    dfa = sort_tasks_based_on_section_and_uneder_section_sort(dfa)
+    df = sort_tasks_based_on_section_and_sort(df)
 
     ##
-    dfa = fix_cols(dfa)
+    df = fix_cols(df)
 
     ##
-    dfa = make_sections(dfa)
+    df = make_sections(df)
     print('All sections created.')
 
     ##
-    dfa = propagate_exculsion_and_drop_final_exculded_tasks(dfa)
+    df = propagate_exculsion_and_drop_final_exculded_tasks(df)
 
     ##
-    dfa[c.par_id] = None
+    df[c.par_id] = None
 
-    for indnt in np.sort(dfa[c.indnt].unique()) :
-        dfa = make_tasks_with_the_indent(dfa , indnt)
+    for indnt in np.sort(df[c.indnt].unique()) :
+        df = make_tasks_with_the_indent(df , indnt)
 
 ##
 
@@ -351,14 +355,3 @@ def main() :
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
-
-##
-
-if False :
-    pass
-
-    ##
-
-    ##
-
-    ##
