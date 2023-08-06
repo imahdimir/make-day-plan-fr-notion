@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import requests
 from todoist_api_python.api import TodoistAPI
+import warnings
 
 from models import ColName
 from models import Notion
@@ -23,6 +24,8 @@ from util import get_all_sections
 from util import get_all_tasks
 from util import Params
 from util import ret_not_special_items_of_a_class as rnsioac
+
+warnings.filterwarnings('ignore')
 
 c = ColName()
 ty = Types()
