@@ -2,7 +2,7 @@
 
     """
 
-from mtok import get_token as get_tok
+from mtok import get_token
 
 class ColName :
     url = 'url'
@@ -68,8 +68,8 @@ class Types :
     sec = 'section'
 
 class Notion :
-    tok = get_tok('Notion')
-    db_id = get_tok('Notion_Day_Routine_db_id')
+    tok = get_token('Notion')
+    db_id = get_token('Notion_Day_Routine_db_id')
     db_url = f'https://api.notion.com/v1/databases/{db_id}/query'
     pg_url = 'https://api.notion.com/v1/pages/'
     hdrs = {
@@ -78,7 +78,7 @@ class Notion :
             }
 
 class Todoist :
-    tok = get_tok('Todoist')
+    tok = get_token('Todoist')
     hdrs = {
             'Authorization' : f'Bearer {tok}'
             }

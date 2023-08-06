@@ -1,5 +1,5 @@
 requests==2.31.0
 pandas==2.0.3
-mtok==0.2.0
+mtok==1.0.0
 pytz==2023.3
 numpy==1.25.0
