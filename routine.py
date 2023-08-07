@@ -185,7 +185,7 @@ def filter_tasks_to_take_out_from_sections() :
     # get all tasks
     df = get_all_tasks()
 
-    # keep only tasks in routine project
+    # keep only tasks in the routine project
     msk = df[tsk.project_id].eq(pa.routine_proj_id)
     df = df[msk]
 
@@ -218,7 +218,7 @@ def move_all_tasks_out_of_sections() :
 def rm_all_sections_in_the_routine_proj() :
     df = get_all_sections()
 
-    # keep only section in the day routine project
+    # keep only sections in the day routine project
     msk = df[ts.project_id].eq(pa.routine_proj_id)
     df = df[msk]
 
