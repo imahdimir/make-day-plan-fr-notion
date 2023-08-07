@@ -312,9 +312,6 @@ def main() :
     pass
 
     ##
-    print(no.tok)
-
-    ##
     move_all_tasks_out_of_sections()
 
     ##
