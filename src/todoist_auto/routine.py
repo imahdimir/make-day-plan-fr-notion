@@ -11,18 +11,18 @@ import pandas as pd
 import requests
 from todoist_api_python.api import TodoistAPI
 
-from models import ColName
-from models import Notion
-from models import Todoist
-from models import TodoistProject
-from models import TodoistSection
-from models import TodoistTask
-from models import Types
-from util import del_sections
-from util import get_all_sections
-from util import get_all_tasks
-from util import Params
-from util import ret_not_special_items_of_a_class as rnsioac
+from .models import ColName
+from .models import Notion
+from .models import Todoist
+from .models import TodoistProject
+from .models import TodoistSection
+from .models import TodoistTask
+from .models import Types
+from .util import del_sections
+from .util import get_all_sections
+from .util import get_all_tasks
+from .util import Params
+from .util import ret_not_special_items_of_a_class as rnsioac
 
 warnings.filterwarnings('ignore')
 

@@ -10,10 +10,10 @@ import pandas as pd
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.api_async import TodoistAPIAsync
 
-from models import Todoist
-from models import TodoistProject
-from models import TodoistSection
-from models import TodoistTask
+from .models import Todoist
+from .models import TodoistProject
+from .models import TodoistSection
+from .models import TodoistTask
 
 to = Todoist()
 tp = TodoistProject()

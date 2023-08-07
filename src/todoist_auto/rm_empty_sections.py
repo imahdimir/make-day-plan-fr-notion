@@ -5,14 +5,14 @@
 import datetime as dt
 from pathlib import Path
 
-from models import ColName
-from models import Todoist
-from models import TodoistSection
-from models import TodoistTask
-from util import del_sections
-from util import get_all_sections
-from util import get_all_tasks
-from util import Params
+from .models import ColName
+from .models import Todoist
+from .models import TodoistSection
+from .models import TodoistTask
+from .util import del_sections
+from .util import get_all_sections
+from .util import get_all_tasks
+from .util import Params
 
 to = Todoist()
 tt = TodoistTask()
