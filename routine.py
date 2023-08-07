@@ -3,14 +3,13 @@
     """
 
 import uuid
+import warnings
 from functools import partial
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import requests
 from todoist_api_python.api import TodoistAPI
-import warnings
 
 from models import ColName
 from models import Notion
@@ -349,7 +348,7 @@ def main() :
     ##
     df[c.par_id] = None
 
-    for indnt in np.sort(df[c.indnt].unique()) :
+    for indnt in sorted(df[c.indnt].unique().tolist()) :
         df = make_tasks_with_the_indent(df , indnt)
 
 ##
