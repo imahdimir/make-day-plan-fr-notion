@@ -78,7 +78,7 @@ class Notion :
             }
 
 class Todoist :
-    tok = get_token('Todoist')
+    tok = get_token('todoist_auto')
     hdrs = {
             'Authorization' : f'Bearer {tok}'
             }
