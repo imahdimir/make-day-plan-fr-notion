@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-from todoist_api_python.api import TodoistAPI
+from todoist_api.api import TodoistAPI
 
 from .models import ColName
 from .models import Notion

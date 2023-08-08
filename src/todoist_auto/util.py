@@ -7,8 +7,8 @@ import pytz
 import datetime
 
 import pandas as pd
-from todoist_api_python.api import TodoistAPI
-from todoist_api_python.api_async import TodoistAPIAsync
+from todoist_api.api import TodoistAPI
+from todoist_api.api_async import TodoistAPIAsync
 
 from .models import Todoist
 from .models import TodoistProject
