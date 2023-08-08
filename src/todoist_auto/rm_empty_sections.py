@@ -36,7 +36,7 @@ def find_next_reset_datetime() :
     else :
         rrdt = dt.datetime.combine(dtn.date() , pa.routine_reset_time)
 
-    print('next reset datetime: ' , rrdt)
+    # print('next reset datetime: ' , rrdt)
 
     return rrdt
 
