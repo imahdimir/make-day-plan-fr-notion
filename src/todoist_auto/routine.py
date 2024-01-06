@@ -11,20 +11,19 @@ import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
 
-from .models import ColName
-from .models import Notion
-from .models import Todoist
-from .models import TodoistProject
-from .models import TodoistSection
-from .models import TodoistTask
-from .models import Types
-from .util import del_sections
-from .util import get_all_sections
-from .util import get_all_tasks
-from .util import Params
-from .util import ret_not_special_items_of_a_class as rnsioac
+from todoist_auto.models import ColName
+from todoist_auto.models import Notion
+from todoist_auto.models import Todoist
+from todoist_auto.models import TodoistProject
+from todoist_auto.models import TodoistSection
+from todoist_auto.models import TodoistTask
+from todoist_auto.models import Types
+from todoist_auto.util import del_sections
+from todoist_auto.util import get_all_sections
+from todoist_auto.util import get_all_tasks
+from todoist_auto.util import Params
+from todoist_auto.util import ret_not_special_items_of_a_class as rnsioac
 
-warnings.filterwarnings('ignore')
 
 c = ColName()
 ty = Types()
@@ -224,19 +223,26 @@ def rm_all_sections_in_the_routine_proj() :
 
     del_sections(df[ts.id])
 
-def get_the_routine_fr_notion() :
+def get_routine_from_notion_db() :
+    pass
 
+    ##
     proxies = {
-            'http'  : '172.31.0.235:8080' ,
-            'https' : '172.31.0.235:8080' ,
+            'http'  : '172.31.0.221:8080' ,
+            'https' : '172.31.0.221:8080' ,
             }
 
     if False :
         pass
 
+        ##
+
         r = requests.post(no.db_url , headers = no.hdrs , proxies = proxies)
 
+    ##
     r = requests.post(no.db_url , headers = no.hdrs)
+
+    ##
 
     secs = r.json()['results']
     df = pd.DataFrame(secs)
@@ -319,10 +325,10 @@ def main() :
     rm_all_sections_in_the_routine_proj()
 
     ##
-    df_a = get_the_routine_fr_notion()
+    dfa = get_routine_from_notion_db()
 
     ##
-    df = get_all_pages_in_routine_db_from_notion(df_a)
+    df = get_all_pages_in_routine_db_from_notion(dfa)
 
     ##
     df = format_page_properties(df)
@@ -357,4 +363,3 @@ def main() :
 
 if __name__ == "__main__" :
     main()
-    print(f'{Path(__file__).name} Done!')
