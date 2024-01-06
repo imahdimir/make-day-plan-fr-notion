@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "todoist_auto"
-version = "7.0.0"
+version = "8.0.0"
 authors = [{ name = "Mahdi Mir", email = "imahdimir@gmail.com" }]
-description = "Automating Todoist"
+description = "Automating My Todoist"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [

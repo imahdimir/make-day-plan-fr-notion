@@ -209,7 +209,7 @@ def move_a_task_under_a_section_out_to_routine_project(task_id) :
                   data = dta)
 
 def move_all_tasks_out_of_sections() :
-    """move all not done tasks out of sections to routine project body"""
+    """ move all not done tasks out of sections to routine project body """
 
     df = filter_tasks_to_take_out_from_sections()
     for ind , ro in df.iterrows() :
@@ -225,6 +225,7 @@ def rm_all_sections_in_the_routine_proj() :
     del_sections(df[ts.id])
 
 def get_the_routine_fr_notion() :
+
     proxies = {
             'http'  : '172.31.0.235:8080' ,
             'https' : '172.31.0.235:8080' ,

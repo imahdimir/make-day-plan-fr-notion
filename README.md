@@ -1,1 +1,1 @@
-Automating Todoist
+Automating my Todoist

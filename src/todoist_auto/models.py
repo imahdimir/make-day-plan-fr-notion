@@ -68,8 +68,8 @@ class Types :
     sec = 'section'
 
 class Notion :
-    tok = get_token('Notion')
-    db_id = get_token('Notion_Day_Routine_db_id')
+    tok = get_token('Notion_imahdimirgmail')
+    db_id = get_token('Notion_Routine_DB_ID')
     db_url = f'https://api.notion.com/v1/databases/{db_id}/query'
     pg_url = 'https://api.notion.com/v1/pages/'
     hdrs = {
