@@ -3,10 +3,10 @@
     """
 
 import asyncio
-import pytz
 import datetime
 
 import pandas as pd
+import pytz
 from todoist_api.api import TodoistAPI
 from todoist_api.api_async import TodoistAPIAsync
 

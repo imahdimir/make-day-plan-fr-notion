@@ -3,14 +3,11 @@
     """
 
 import uuid
-import warnings
 from functools import partial
-from pathlib import Path
 
 import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
-
 from todoist_auto.models import ColName
 from todoist_auto.models import Notion
 from todoist_auto.models import Todoist
@@ -23,7 +20,6 @@ from todoist_auto.util import get_all_sections
 from todoist_auto.util import get_all_tasks
 from todoist_auto.util import Params
 from todoist_auto.util import ret_not_special_items_of_a_class as rnsioac
-
 
 c = ColName()
 ty = Types()
