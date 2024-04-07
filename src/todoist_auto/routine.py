@@ -355,7 +355,5 @@ def main() :
         df = make_tasks_with_the_indent(df , indnt)
 
 ##
-
-
 if __name__ == "__main__" :
     main()

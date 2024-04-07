@@ -1,7 +1,3 @@
-"""
-
-    """
-
 from mtok import get_token
 
 class ColName :

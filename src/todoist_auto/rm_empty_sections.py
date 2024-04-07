@@ -5,14 +5,14 @@
 import datetime as dt
 from pathlib import Path
 
-from .models import ColName
-from .models import Todoist
-from .models import TodoistSection
-from .models import TodoistTask
-from .util import del_sections
-from .util import get_all_sections
-from .util import get_all_tasks
-from .util import Params
+from todoist_auto.models import ColName
+from todoist_auto.models import Todoist
+from todoist_auto.models import TodoistSection
+from todoist_auto.models import TodoistTask
+from todoist_auto.util import del_sections
+from todoist_auto.util import get_all_sections
+from todoist_auto.util import get_all_tasks
+from todoist_auto.util import Params
 
 to = Todoist()
 tt = TodoistTask()
@@ -160,8 +160,6 @@ def main() :
     del_sections(df.loc[df[c.rm_sec] , ts.id])
 
 ##
-
-
 if __name__ == '__main__' :
     main()
     print(f'{Path(__file__).name} Done!')
