@@ -162,10 +162,10 @@ def main() :
 ##
 if __name__ == '__main__' :
     main()
-    print(Path(__file__).relative_to(Path.cwd()) , ' Done.')
+    print(Path(__file__).relative_to(Path.cwd()) , ' Done!')
 
 ##
-def testing_area() :
+def _test() :
     pass
 
     ##
