@@ -17,13 +17,6 @@ from todoist_auto.models import TodoistTask
 to = Todoist()
 tp = TodoistProject()
 
-class Params :
-    routine_proj_id = '2312505898'
-    tz = pytz.timezone('Asia/Tehran')
-    routine_reset_time = datetime.time(3 , 35 , 0 , tzinfo = tz)
-
-pa = Params()
-
 def ret_not_special_items_of_a_class(cls) :
     return {x : y for x , y in cls.__dict__.items() if not x.startswith('__')}
 

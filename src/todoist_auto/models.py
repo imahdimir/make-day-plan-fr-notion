@@ -1,17 +1,14 @@
 from mtok import get_token
 
-class ColName :
+class Var :
     url = 'url'
     jsn = 'json'
-    th = 'T-[h]'
-    tm = 'T-[m]'
     indnt = 'INDENT'
     srt = 'sort'
     sec = 'section'
     secn = 'secn'
     secmt = 'sec_max_time'
     pri = 'PRIORITY'
-    tty = 'T Type'
     cnt = 'CONTENT'
     ty = "TYPE"
     sec_id = 'sec_id'
@@ -19,6 +16,9 @@ class ColName :
     labels = 'labels'
     excl = 'Exclude'
     rm_sec = 'remove_section'
+    id = 'ID'
+
+VAR = Var()
 
 class TodoistTask :
     assignee_id = 'assignee_id'
@@ -39,11 +39,15 @@ class TodoistTask :
     section_id = 'section_id'
     url = 'url'
 
+TODOISTTASK = TodoistTask()
+
 class TodoistSection :
     id = 'id'
     name = 'name'
     order = 'order'
     project_id = 'project_id'
+
+TODOISTSECTION = TodoistSection()
 
 class TodoistProject :
     color = 'color'
@@ -59,9 +63,13 @@ class TodoistProject :
     url = 'url'
     view_style = 'view_style'
 
+TODOISTPROJECT = TodoistProject()
+
 class Types :
     tsk = 'task'
     sec = 'section'
+
+TYPES = Types()
 
 class Notion :
     tok = get_token('Notion_imahdimirgmail')
@@ -73,8 +81,13 @@ class Notion :
             'Notion-Version' : '2022-06-28' ,
             }
 
+NOTION = Notion()
+
 class Todoist :
     tok = get_token('Todoist')
     hdrs = {
             'Authorization' : f'Bearer {tok}'
             }
+    routine_proj_id = '2312505898'
+
+TODOIST = Todoist()

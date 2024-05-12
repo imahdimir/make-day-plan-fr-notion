@@ -8,28 +8,21 @@ from functools import partial
 import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
-from todoist_auto.models import ColName
-from todoist_auto.models import Notion
-from todoist_auto.models import Todoist
-from todoist_auto.models import TodoistProject
-from todoist_auto.models import TodoistSection
-from todoist_auto.models import TodoistTask
-from todoist_auto.models import Types
-from todoist_auto.util import del_sections
-from todoist_auto.util import get_all_sections
-from todoist_auto.util import get_all_tasks
-from todoist_auto.util import Params
-from todoist_auto.util import ret_not_special_items_of_a_class as rnsioac
 
-c = ColName()
-ty = Types()
-ts = TodoistSection()
-tsk = TodoistTask()
-tsd = rnsioac(TodoistSection)
-tp = TodoistProject()
-tpd = rnsioac(TodoistProject)
-no = Notion()
-to = Todoist()
+from src.todoist_auto.models import NOTION as no
+from src.todoist_auto.models import TODOIST as to
+from src.todoist_auto.models import TODOISTPROJECT as tp
+from src.todoist_auto.models import TODOISTSECTION as ts
+from src.todoist_auto.models import TODOISTTASK as tsk
+from src.todoist_auto.models import VAR as v
+from src.todoist_auto.util import del_sections
+from src.todoist_auto.util import get_all_sections
+from src.todoist_auto.util import get_all_tasks
+from src.todoist_auto.util import Params
+from src.todoist_auto.util import ret_not_special_items_of_a_class as rnsioac
+
+tsd = rnsioac(ts)
+tpd = rnsioac(tp)
 
 api = TodoistAPI(to.tok)
 
@@ -55,45 +48,13 @@ def get_checkbox_col_val(x) :
     return x['checkbox']
 
 def fix_indents(df) :
-    df[c.indnt] = df[c.indnt].fillna(1)
-    df[c.indnt] = df[c.indnt].astype(int)
-    return df
-
-def add_time_to_cont(df) :
-    _df = df.copy()
-
-    msk = df[c.th].notna()
-    msk |= df[c.tm].notna()
-
-    _df[[c.th , c.tm]] = _df[[c.th , c.tm]].fillna(0)
-
-    msk1 = df[c.tm].lt(10)
-    msk1 &= msk
-
-    _df.loc[msk1 , c.tm] = '0' + _df.loc[msk1 , c.tm].astype(int).astype(str)
-
-    msk2 = df[c.tm].ge(10)
-    msk2 &= msk
-    _df.loc[msk2 , c.tm] = _df.loc[msk2 , c.tm].astype(int).astype(str)
-
-    h = _df.loc[msk , c.th].astype(int).astype(str)
-    m = _df.loc[msk , c.tm].astype(str)
-
-    df.loc[msk , c.cnt] = df.loc[msk , c.cnt] + ' - ***' + h + ':' + m + '***'
-
-    df = df.drop(columns = [c.th , c.tm])
-
-    return df
-
-def add_t_type_to_cnt(df) :
-    msk = df[c.tty].notna()
-    df.loc[msk , c.cnt] = df.loc[msk , c.cnt] + ' @' + df.loc[msk , c.tty]
-    df = df.drop(columns = c.tty)
+    df[v.indnt] = df[v.indnt].fillna(1)
+    df[v.indnt] = df[v.indnt].astype('Int64')
     return df
 
 def fillna_priority(df) :
-    msk = df[c.pri].isna()
-    df.loc[msk , c.pri] = 4
+    msk = df[v.pri].isna()
+    df.loc[msk , v.pri] = 4
     return df
 
 def make_labels_list(df) :
@@ -101,47 +62,47 @@ def make_labels_list(df) :
             }
 
     if not lbl_cols :
-        df[c.labels] = df[c.cnt].apply(lambda x : [])
+        df[v.labels] = df[v.cnt].apply(lambda x : [])
         return df
 
     _fu = lambda x : [x] if x is not None else []
-    df[c.labels] = df[list(lbl_cols.keys())[0]].apply(_fu)
+    df[v.labels] = df[list(lbl_cols.keys())[0]].apply(_fu)
     for col in list(lbl_cols.keys())[1 :] :
-        df[c.labels] = df[c.labels] + df[col].apply(_fu)
+        df[v.labels] = df[v.labels] + df[col].apply(_fu)
     return df
 
 def make_sections(df) :
     """ Make sections and get their ids """
-    for sec in df[c.sec].unique().tolist() :
+    for sec in df[v.sec].unique().tolist() :
 
         if pd.isna(sec) :
             continue
 
         ose = api.add_section(sec , pa.routine_proj_id)
 
-        msk = df[c.sec].eq(sec)
-        df.loc[msk , c.sec_id] = ose.id
+        msk = df[v.sec].eq(sec)
+        df.loc[msk , v.sec_id] = ose.id
 
     return df
 
 def make_tasks_with_the_indent(df , indent) :
-    msk = df[c.indnt].eq(indent)
+    msk = df[v.indnt].eq(indent)
 
-    df.loc[msk , c.par_id] = df[c.par_id].ffill()
+    df.loc[msk , v.par_id] = df[v.par_id].ffill()
 
     _df = df[msk]
 
     for ind , row in _df.iterrows() :
-        sid = row[c.sec_id] if not pd.isna(row[c.sec_id]) else None
+        sid = row[v.sec_id] if not pd.isna(row[v.sec_id]) else None
 
-        tska = api.add_task(content = row[c.cnt] ,
+        tska = api.add_task(content = row[v.cnt] ,
                             project_id = pa.routine_proj_id ,
                             section_id = sid ,
-                            priority = 5 - int(row[c.pri]) ,
-                            parent_id = row[c.par_id] ,
-                            labels = row[c.labels])
+                            priority = 5 - int(row[v.pri]) ,
+                            parent_id = row[v.par_id] ,
+                            labels = row[v.labels])
 
-        df.at[ind , c.par_id] = tska.id
+        df.at[ind , v.par_id] = tska.id
 
     return df
 
@@ -151,7 +112,7 @@ def get_pgs(url , proxies = None) :
 
 def find_next_not_sub_task_index(subdf , indent) :
     df = subdf
-    df['h'] = df[c.indnt].le(indent)
+    df['h'] = df[v.indnt].le(indent)
     return df['h'].idxmax()
 
 def propagate_exculsion_and_drop_final_exculded_tasks(df) :
@@ -160,19 +121,19 @@ def propagate_exculsion_and_drop_final_exculded_tasks(df) :
 
     # propagate exculde to sub-tasks
     for indx , row in df.iloc[:-1].iterrows() :
-        if not row[c.excl] :
+        if not row[v.excl] :
             continue
 
-        nidx = find_next_not_sub_task_index(df[indx + 1 :] , row[c.indnt])
+        nidx = find_next_not_sub_task_index(df[indx + 1 :] , row[v.indnt])
 
         msk_range = pd.RangeIndex(start = indx , stop = nidx)
 
         msk = df.index.isin(msk_range)
 
-        df.loc[msk , c.excl] = True
+        df.loc[msk , v.excl] = True
 
     # drop exculded tasks
-    df = df[~ df[c.excl]]
+    df = df[~ df[v.excl]]
 
     return df
 
@@ -223,30 +184,30 @@ def get_routine_from_notion_db() :
     pass
 
     ##
-    proxies = {
-            'http'  : '172.31.0.221:8080' ,
-            'https' : '172.31.0.221:8080' ,
-            }
-
-    if False :
+    def _if_proxy_needed() :
         pass
 
         ##
+        proxies = {
+                'http'  : '172.31.0.221:8080' ,
+                'https' : '172.31.0.221:8080' ,
+                }
 
+        ##
         r = requests.post(no.db_url , headers = no.hdrs , proxies = proxies)
 
     ##
     r = requests.post(no.db_url , headers = no.hdrs)
 
     ##
-
     secs = r.json()['results']
     df = pd.DataFrame(secs)
 
     df = df[['id']]
     df['id'] = df['id'].str.replace('-' , '')
-    df[c.url] = no.pg_url + df['id']
+    df[v.url] = no.pg_url + df['id']
 
+    ##
     return df
 
 def get_all_pages_in_routine_db_from_notion(df) :
@@ -255,11 +216,11 @@ def get_all_pages_in_routine_db_from_notion(df) :
 
         fu = partial(get_pgs , proxies = proxies)
 
-        df[c.jsn] = df[c.url].apply(lambda x : fu(x))
+        df[v.jsn] = df[v.url].apply(lambda x : fu(x))
 
-    df[c.jsn] = df[c.url].apply(lambda x : get_pgs(x))
+    df[v.jsn] = df[v.url].apply(lambda x : get_pgs(x))
 
-    df = df[c.jsn].apply(lambda x : pd.Series(eval(x)))
+    df = df[v.jsn].apply(lambda x : pd.Series(eval(x)))
     df = df[['id' , 'properties']]
 
     df = df['properties'].apply(pd.Series)
@@ -268,47 +229,45 @@ def get_all_pages_in_routine_db_from_notion(df) :
 
 def format_page_properties(df) :
     apply_dct = {
-            c.th    : get_num_col_val ,
-            c.tm    : get_num_col_val ,
-            c.indnt : get_select_col_val ,
-            c.srt   : get_num_col_val ,
-            c.sec   : get_select_col_val ,
-            c.pri   : get_select_col_val ,
-            c.tty   : get_select_col_val ,
-            c.cnt   : get_txt_content_fr_notion_name ,
-            c.excl  : get_checkbox_col_val
+            v.id    : lambda x : str(x['unique_id']['number']) ,
+            v.sec   : get_select_col_val ,
+            v.srt   : get_num_col_val ,
+            v.pri   : get_select_col_val ,
+            v.cnt   : get_txt_content_fr_notion_name ,
+            v.indnt : get_select_col_val ,
+            v.excl  : get_checkbox_col_val ,
             }
 
     for col , func in apply_dct.items() :
         df[col] = df[col].apply(func)
 
+    df = df[apply_dct.keys()]
+
     return df
 
 def split_section_order_and_section_name(df) :
-    new_cols = [c.secn , c.sec]
-    df[new_cols] = df[c.sec].str.split('-' , expand = True , n = 1)
+    new_cols = [v.secn , v.sec]
+    df[new_cols] = df[v.sec].str.split('-' , expand = True , n = 1)
 
-    df[c.secn] = df[c.secn].str.strip()
-    df[c.sec] = df[c.sec].str.strip()
+    df[v.secn] = df[v.secn].str.strip()
+    df[v.sec] = df[v.sec].str.strip()
 
     return df
 
 def fix_section_order(df) :
-    msk = df[c.secn].isna()
-    df.loc[msk , c.secn] = 0
+    msk = df[v.secn].isna()
+    df.loc[msk , v.secn] = 0
     return df
 
 def sort_tasks_based_on_section_and_sort(df) :
-    df = df.sort_values([c.secn , c.srt] , ascending = True)
-    df = df.drop(columns = [c.secn , c.srt])
+    df = df.sort_values([v.secn , v.srt] , ascending = True)
+    df = df.drop(columns = [v.secn , v.srt])
     return df
 
 def fix_cols(df) :
     df = fix_indents(df)
-    df = add_time_to_cont(df)
     df = fillna_priority(df)
     df = make_labels_list(df)
-    df = add_t_type_to_cnt(df)
     return df
 
 def main() :
@@ -324,9 +283,10 @@ def main() :
     dfa = get_routine_from_notion_db()
 
     ##
-    df = get_all_pages_in_routine_db_from_notion(dfa)
+    dfb = get_all_pages_in_routine_db_from_notion(dfa)
 
     ##
+    df = dfb.copy()
     df = format_page_properties(df)
 
     ##
@@ -349,11 +309,12 @@ def main() :
     df = propagate_exculsion_and_drop_final_exculded_tasks(df)
 
     ##
-    df[c.par_id] = None
+    df[v.par_id] = None
 
-    for indnt in sorted(df[c.indnt].unique().tolist()) :
+    for indnt in sorted(df[v.indnt].unique().tolist()) :
         df = make_tasks_with_the_indent(df , indnt)
 
 ##
-if __name__ == "__main__" :
+if __name__ == '__main__' :
     main()
+    print(Path(__file__).relative_to(Path.cwd()) , ' Done!')
