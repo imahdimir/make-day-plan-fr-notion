@@ -56,16 +56,26 @@ def fillna_priority(df) :
     return df
 
 def make_sections(df) :
-    """ Make sections and get their ids """
-    for sec in df[V.sec].unique().tolist() :
+    """ Make all sections and get their IDs, assuming section order prefixes are unique. """
 
-        if pd.isna(sec) :
+    created_secs = []
+
+    for _ , ro in df.iterrows() :
+
+        s = ro[V.sec]
+        sn = ro[V.secn]
+
+        if pd.isna(s) :
             continue
 
-        ose = API.add_section(sec , TO.routine_proj_id)
+        if s in created_secs :
+            continue
 
-        msk = df[V.sec].eq(sec)
-        df.loc[msk , V.sec_id] = ose.id
+        ose = API.add_section(s , TO.routine_proj_id)
+
+        created_secs.append(s)
+
+        df.loc[df[V.secn].eq(sn) , V.sec_id] = ose.id
 
     return df
 
@@ -215,9 +225,7 @@ def fix_section_order(df) :
     return df
 
 def sort_tasks_based_on_section_and_sort(df) :
-    df = df.sort_values([V.secn , V.srt] , ascending = True)
-    df = df.drop(columns = [V.secn , V.srt])
-    return df
+    return df.sort_values([V.secn , V.srt] , ascending = True)
 
 def fix_cols(df) :
     df = fix_indents(df)
@@ -272,4 +280,4 @@ def main() :
 ##
 if __name__ == '__main__' :
     main()
-    print(__file__ , ' Done!')
+    print(__file__ , 'Done!')
