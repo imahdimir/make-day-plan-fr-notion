@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 
 import pandas as pd
 from todoist_api.api import TodoistAPI
@@ -8,8 +9,9 @@ from .models import TODOIST as TO
 from .models import TODOISTSECTION as TS
 from .models import TODOISTTASK as TSK
 
-def ret_not_special_items_of_a_class(cls) :
-    return {x : y for x , y in cls.__dict__.items() if not x.startswith('__')}
+def ret_not_special_items_of_a_class(class_instance) :
+    m = inspect.getmembers(class_instance)
+    return {x : y for x , y in m if not x.startswith('__')}
 
 TSD = ret_not_special_items_of_a_class(TS)
 TTD = ret_not_special_items_of_a_class(TSK)

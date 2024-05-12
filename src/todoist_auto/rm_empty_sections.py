@@ -16,7 +16,7 @@ from .util import get_all_tasks
 
 def update_rm_sec_based_on_having_no_task(df) :
     dft = get_all_tasks()
-    # mark sections with no tasks as true
+    # mark sections with NO tasks as true
     msk = ~ df[TS.id].isin(dft[TT.section_id])
     df.loc[: , V.rm_sec] &= msk
     return df
