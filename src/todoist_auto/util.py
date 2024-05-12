@@ -5,21 +5,19 @@ from todoist_api.api import TodoistAPI
 from todoist_api.api_async import TodoistAPIAsync
 
 from .models import TODOIST as TO
-from .models import TODOISTPROJECT as TP
 from .models import TODOISTSECTION as TS
 from .models import TODOISTTASK as TSK
 
 def ret_not_special_items_of_a_class(cls) :
     return {x : y for x , y in cls.__dict__.items() if not x.startswith('__')}
 
-tpd = ret_not_special_items_of_a_class(TP)
-tsd = ret_not_special_items_of_a_class(TS)
-ttd = ret_not_special_items_of_a_class(TSK)
+TSD = ret_not_special_items_of_a_class(TS)
+TTD = ret_not_special_items_of_a_class(TSK)
 
 def get_all_sections() :
     secs = asyncio.run(get_sections_async())
     df = pd.DataFrame()
-    for col in tsd :
+    for col in TSD :
         df[col] = [getattr(x , col) for x in secs]
     return df
 
@@ -44,6 +42,6 @@ async def get_all_tasks_async() :
 def get_all_tasks() :
     tsks = asyncio.run(get_all_tasks_async())
     df = pd.DataFrame()
-    for col in ttd :
+    for col in TTD :
         df[col] = [getattr(x , col) for x in tsks]
     return df
