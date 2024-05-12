@@ -5,7 +5,6 @@
     """
 
 import uuid
-from pathlib import Path
 
 import pandas as pd
 import requests
@@ -273,4 +272,4 @@ def main() :
 ##
 if __name__ == '__main__' :
     main()
-    print(Path(__file__).relative_to(Path.cwd()) , ' Done!')
+    print(__file__ , ' Done!')
