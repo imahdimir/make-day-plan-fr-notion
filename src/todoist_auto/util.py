@@ -1,34 +1,20 @@
-"""
-
-    """
-
 import asyncio
-import datetime
 
 import pandas as pd
-import pytz
 from todoist_api.api import TodoistAPI
 from todoist_api.api_async import TodoistAPIAsync
-from todoist_auto.models import Todoist
-from todoist_auto.models import TodoistProject
-from todoist_auto.models import TodoistSection
-from todoist_auto.models import TodoistTask
 
-to = Todoist()
-tp = TodoistProject()
+from .models import TODOIST as TO
+from .models import TODOISTPROJECT as TP
+from .models import TODOISTSECTION as TS
+from .models import TODOISTTASK as TSK
 
 def ret_not_special_items_of_a_class(cls) :
     return {x : y for x , y in cls.__dict__.items() if not x.startswith('__')}
 
-tpd = ret_not_special_items_of_a_class(TodoistProject)
-tsd = ret_not_special_items_of_a_class(TodoistSection)
-ttd = ret_not_special_items_of_a_class(TodoistTask)
-
-def get_daily_routine_project_id() :
-    df = get_all_todoist_projects()
-    msk = df[tp.name].eq('routine')
-    ind = df[msk].index[0]
-    return df.at[ind , tp.id]
+tpd = ret_not_special_items_of_a_class(TP)
+tsd = ret_not_special_items_of_a_class(TS)
+ttd = ret_not_special_items_of_a_class(TSK)
 
 def get_all_sections() :
     secs = asyncio.run(get_sections_async())
@@ -38,20 +24,12 @@ def get_all_sections() :
     return df
 
 def del_sections(id_list) :
-    api = TodoistAPI(to.tok)
+    api = TodoistAPI(TO.tok)
     for idi in id_list :
         api.delete_section(idi)
 
-def get_all_todoist_projects() :
-    apia = TodoistAPIAsync(to.tok)
-    secs = asyncio.run(apia.get_projects())
-    df = pd.DataFrame()
-    for col in tpd :
-        df[col] = [getattr(x , col) for x in secs]
-    return df
-
 async def get_sections_async() :
-    api = TodoistAPIAsync(to.tok)
+    api = TodoistAPIAsync(TO.tok)
     try :
         scs = await api.get_sections()
         return scs
@@ -59,7 +37,7 @@ async def get_sections_async() :
         print(error)
 
 async def get_all_tasks_async() :
-    api = TodoistAPIAsync(to.tok)
+    api = TodoistAPIAsync(TO.tok)
     tsks = await api.get_tasks()
     return tsks
 
