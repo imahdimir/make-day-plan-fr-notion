@@ -45,6 +45,11 @@ def get_num_col_val(x) :
 def get_checkbox_col_val(x) :
     return x['checkbox']
 
+def get_rich_text_col_val(x) :
+    l = x['rich_text']
+    if len(l) > 0 :
+        return l[0]['text']['content']
+
 def fix_indents(df) :
     df[V.indnt] = df[V.indnt].fillna(1)
     df[V.indnt] = df[V.indnt].astype(int)
@@ -90,6 +95,7 @@ def make_tasks_with_the_indent(df , indent) :
         sid = row[V.sec_id] if not pd.isna(row[V.sec_id]) else None
 
         tska = API.add_task(content = row[V.cnt] ,
+                            description = row[V.dsc] ,
                             project_id = TO.routine_proj_id ,
                             section_id = sid ,
                             priority = 5 - int(row[V.pri]) ,
@@ -199,6 +205,7 @@ def format_page_properties(df) :
             V.srt   : get_num_col_val ,
             V.pri   : get_select_col_val ,
             V.cnt   : get_txt_content_fr_notion_name ,
+            V.dsc   : get_rich_text_col_val ,
             V.indnt : get_select_col_val ,
             V.excl  : get_checkbox_col_val ,
             }

@@ -17,6 +17,7 @@ class Var :
     excl = 'Exclude'
     rm_sec = 'remove_section'
     id = 'ID'
+    dsc = 'Description'
 
 VAR = Var()
 
