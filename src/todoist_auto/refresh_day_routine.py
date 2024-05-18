@@ -10,16 +10,16 @@ import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
 
-from .models import NOTION as NO
-from .models import TODOIST as TO
-from .models import TODOISTPROJECT as TP
-from .models import TODOISTSECTION as TS
-from .models import TODOISTTASK as TSK
-from .models import VAR as V
-from .util import del_sections
-from .util import get_all_sections
-from .util import get_all_tasks
-from .util import ret_not_special_items_of_a_class
+from src.todoist_auto.models import NOTION as NO
+from src.todoist_auto.models import TODOIST as TO
+from src.todoist_auto.models import TODOISTPROJECT as TP
+from src.todoist_auto.models import TODOISTSECTION as TS
+from src.todoist_auto.models import TODOISTTASK as TSK
+from src.todoist_auto.models import VAR as V
+from src.todoist_auto.util import del_sections
+from src.todoist_auto.util import get_all_sections
+from src.todoist_auto.util import get_all_tasks
+from src.todoist_auto.util import ret_not_special_items_of_a_class
 
 tsd = ret_not_special_items_of_a_class(TS)
 tpd = ret_not_special_items_of_a_class(TP)
@@ -288,3 +288,33 @@ def main() :
 if __name__ == '__main__' :
     main()
     print(__file__ , 'Done!')
+
+##
+def _tset() :
+    """ """
+    
+    ##
+    df = get_all_sections()
+
+    # keep only sections in the day routine project
+    msk = df[TS.project_id].eq(TO.routine_proj_id)
+    df = df[msk]
+
+    ##
+    API.update_section(155975100 ,
+                       name = '-3 _ Right after Wake Up' ,
+                       order = 1)
+
+    ##
+    muuid = uuid.uuid4()
+    dta = {
+            "commands" : r'[ {"type": "section_reorder", "uuid": ' + f'"{muuid}" ,' + r' "args": { "sections": [{"id": 155975100, "section_order": 6}]}}]'
+            }
+    requests.post('https://api.todoist.com/sync/v9/sync' , headers = TO.hdrs ,
+
+                  data = dta)
+
+    ##
+    API.add_section('hi6' , TO.routine_proj_id)
+
+    ##
