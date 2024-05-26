@@ -1,23 +1,23 @@
+import gspread
+from google.oauth2.service_account import Credentials
 from mtok import get_token
 
 class Var :
-    url = 'url'
-    jsn = 'json'
     indnt = 'INDENT'
-    srt = 'sort'
     sec = 'section'
-    secn = 'secn'
-    secmt = 'sec_max_time'
     pri = 'PRIORITY'
     cnt = 'CONTENT'
-    ty = "TYPE"
     sec_id = 'sec_id'
     par_id = 'par_id'
-    labels = 'labels'
     excl = 'Exclude'
     rm_sec = 'remove_section'
     id = 'ID'
     dsc = 'Description'
+    l1 = 'L1'
+    l2 = 'L2'
+    l3 = 'L3'
+    l4 = 'L4'
+    tsk_id = 'task_id'
 
 VAR = Var()
 
@@ -66,24 +66,6 @@ class TodoistProject :
 
 TODOISTPROJECT = TodoistProject()
 
-class Types :
-    tsk = 'task'
-    sec = 'section'
-
-TYPES = Types()
-
-class Notion :
-    tok = get_token('Notion_imahdimirgmail')
-    db_id = get_token('Notion_Routine_DB_ID')
-    db_url = f'https://api.notion.com/v1/databases/{db_id}/query'
-    pg_url = 'https://api.notion.com/v1/pages/'
-    hdrs = {
-            'Authorization'  : f'Bearer {tok}' ,
-            'Notion-Version' : '2022-06-28' ,
-            }
-
-NOTION = Notion()
-
 class Todoist :
     tok = get_token('Todoist')
     hdrs = {
@@ -92,3 +74,18 @@ class Todoist :
     routine_proj_id = '2312505898'
 
 TODOIST = Todoist()
+
+class GSheet :
+    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+
+    tok_key = "Routine_GSheet"
+    creds = get_token(tok_key)
+
+    creds = Credentials.from_service_account_info(creds , scopes = scopes)
+    client = gspread.authorize(creds)
+
+    sheet_id = "1PdUFy37_4pC8rZDFIxRkaakC5q_Do8xZjOw1Xai-51c"
+    workbook = client.open_by_key(sheet_id)
+    sheet_1 = workbook.worksheet("Sheet1")
+
+GSHEET = GSheet()
