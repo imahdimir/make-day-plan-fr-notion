@@ -4,6 +4,8 @@
 
     """
 
+from pathlib import Path
+
 from .models import TODOIST as TO
 from .models import TODOISTSECTION as TS
 from .models import TODOISTTASK as TT
@@ -54,4 +56,4 @@ def main() :
 ##
 if __name__ == '__main__' :
     main()
-    print(__file__ , ' Done!')
+    print(Path(__file__).name , ' Done!')
