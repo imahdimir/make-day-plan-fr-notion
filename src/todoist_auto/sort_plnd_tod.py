@@ -11,9 +11,9 @@ from pathlib import Path
 
 import requests
 
-from src.todoist_auto.models import TODOIST as TO
-from src.todoist_auto.models import TODOISTTASK as TSK
-from src.todoist_auto.util import get_all_tasks
+from .models import TODOIST as TO
+from .models import TODOISTTASK as TSK
+from .util import get_all_tasks
 
 PLND_TOD_SEC_ID = '156240085'
 
