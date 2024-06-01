@@ -72,6 +72,7 @@ class Todoist :
             'Authorization' : f'Bearer {tok}'
             }
     routine_proj_id = '2312505898'
+    inbox_id = '2266805950'
 
 TODOIST = Todoist()
 
