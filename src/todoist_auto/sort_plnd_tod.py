@@ -88,7 +88,7 @@ def main() :
         l = now - strt
         print(l)
 
-        if l.seconds > 59 * 60 :
+        if l.seconds > 10 * 60 :
             break
 
         time.sleep(4)
