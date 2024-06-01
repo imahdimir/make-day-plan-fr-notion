@@ -5,6 +5,7 @@
     """
 
 import datetime
+import time
 import uuid
 from pathlib import Path
 
@@ -43,6 +44,7 @@ def move_all_non_sectioned_tasks_to_plnd_tod(all_inbox_tasks_df) :
 def move_unsectioned_and_sort_plnd_tod_section() :
     """ """
 
+    ##
     df = get_all_inbox_tasks()
 
     move_all_non_sectioned_tasks_to_plnd_tod(df)
@@ -55,6 +57,7 @@ def move_unsectioned_and_sort_plnd_tod_section() :
 
     df = df.reset_index(drop = True)
 
+    ##
     items = ', '.join([f'{{"id": "{ro[TSK.id]}", "child_order": {idx}}}' for
                        idx , ro in df.iterrows()])
 
@@ -64,8 +67,12 @@ def move_unsectioned_and_sort_plnd_tod_section() :
             "commands" : r'[ {"type": "item_reorder", "uuid": ' + f'"{muuid}" ,' + r' "args": { "items": [ ' + f' {items} ' + r']}}]'
             }
 
+    ##
     end_point = 'https://api.todoist.com/sync/v9/sync'
-    requests.post(end_point , headers = TO.hdrs , data = dta)
+    r = requests.post(end_point , headers = TO.hdrs , data = dta)
+    r.text
+
+    ##
 
 def main() :
     pass
@@ -79,11 +86,23 @@ def main() :
         now = datetime.datetime.now()
 
         l = now - strt
+        print(l)
 
-        if l.seconds > 10 * 60 :
+        if l.seconds > 60 * 60 :
             break
+
+        time.sleep(3)
 
 ##
 if __name__ == '__main__' :
     main()
     print(Path(__file__).name , ' Done!')
+
+##
+def _test() :
+    pass
+
+    ##
+    move_unsectioned_and_sort_plnd_tod_section()
+
+    ##
