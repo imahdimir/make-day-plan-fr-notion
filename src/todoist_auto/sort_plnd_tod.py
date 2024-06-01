@@ -91,7 +91,7 @@ def main() :
         if l.seconds > 59 * 60 :
             break
 
-        time.sleep(3)
+        time.sleep(4)
 
 ##
 if __name__ == '__main__' :
