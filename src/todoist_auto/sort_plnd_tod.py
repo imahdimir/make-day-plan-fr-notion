@@ -91,7 +91,7 @@ def main() :
         if l.seconds > 10 * 60 :
             break
 
-        time.sleep(4)
+        time.sleep(10)
 
 ##
 if __name__ == '__main__' :
@@ -104,5 +104,12 @@ def _test() :
 
     ##
     move_unsectioned_and_sort_plnd_tod_section()
+
+    ##
+    from src.todoist_auto.util import get_all_tasks
+
+    df = get_all_tasks()
+
+    ##
 
     ##
