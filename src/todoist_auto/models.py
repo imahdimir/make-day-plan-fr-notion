@@ -2,6 +2,11 @@ import gspread
 from google.oauth2.service_account import Credentials
 from mtok import get_token
 
+class File :
+    tod_map = 'tod_map.prq'
+
+FILE = File()
+
 class Var :
     indnt = 'INDENT'
     sec = 'section'
@@ -18,6 +23,10 @@ class Var :
     l3 = 'L3'
     l4 = 'L4'
     tsk_id = 'task_id'
+    proj_name = 'project_name'
+    tod_lbl = 'Tod'
+    plnd_tod_sec = 'plnd_tod_sec'
+    not_in_plnd_tod_sec = 'not_in_plnd_tod_sec'
 
 VAR = Var()
 
@@ -73,6 +82,7 @@ class Todoist :
             }
     routine_proj_id = '2312505898'
     inbox_id = '2266805950'
+    plnd_tod_sec_id = '156240085'
 
 TODOIST = Todoist()
 

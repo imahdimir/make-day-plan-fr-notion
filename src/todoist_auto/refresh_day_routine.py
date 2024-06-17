@@ -77,7 +77,12 @@ def specify_indents(df) :
         cn = 'L' + str(i)
         df.loc[msk , V.cnt] = df[cn]
         df = df.drop(columns = cn)
-    df = df.dropna(subset = V.cnt)
+    return df
+
+def rm_empty_rows(df) :
+    cols = [V.sec , V.cnt]
+    msk = df[cols].notna().any(axis = 1)
+    df = df[msk]
     return df
 
 def _find_next_not_sub_task_index(subdf , indent) :
@@ -121,24 +126,31 @@ def fix_cols(df) :
 
 def make_all_sections(df) :
     """ Make all sections and get their IDs, assuming section order prefixes are unique. """
+
     df1 = df.copy()
-    df1 = df1.drop_duplicates(subset = V.sec)
+
     df1 = df1.dropna(subset = [V.sec])
+
     df1 = df1[[V.sec]]
+
     for idx , ro in df1.iterrows() :
         s = ro[V.sec]
-        if pd.isna(s) :
-            continue
         ose = API.add_section(s , TO.routine_proj_id)
         df.at[idx , V.sec_id] = ose.id
+
     print('All sections created.')
+
     df[V.sec_id] = df[V.sec_id].ffill()
+
     return df
 
 def make_tasks_with_the_indent(df , indent) :
     msk = df[V.indnt].eq(indent)
+
     df.loc[msk , [V.par_id]] = df[V.tsk_id].ffill()
+
     df1 = df[msk]
+
     for idx , row in df1.iterrows() :
         tsk = API.add_task(content = row[V.cnt] ,
                            description = row[V.dsc] ,
@@ -146,7 +158,9 @@ def make_tasks_with_the_indent(df , indent) :
                            section_id = row[V.sec_id] ,
                            priority = 5 - int(row[V.pri]) ,
                            parent_id = row[V.par_id])
+
         df.loc[idx , [V.tsk_id]] = tsk.id
+
     return df
 
 def main() :
@@ -166,9 +180,6 @@ def main() :
     df = replace_by_nan_and_rm_empty_rows(df)
 
     ##
-    df[V.sec] = df[V.sec].ffill()
-
-    ##
     df = specify_indents(df)
 
     ##
@@ -178,7 +189,13 @@ def main() :
     df = fix_cols(df)
 
     ##
+    df = rm_empty_rows(df)
+
+    ##
     df = make_all_sections(df)
+
+    ##
+    df = df.dropna(subset = V.cnt)
 
     ##
     for indnt in sorted(df[V.indnt].unique().tolist()) :

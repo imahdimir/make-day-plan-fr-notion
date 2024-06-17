@@ -5,16 +5,18 @@ import pandas as pd
 from todoist_api.api import TodoistAPI
 from todoist_api.api_async import TodoistAPIAsync
 
-from .models import TODOIST as TO
-from .models import TODOISTSECTION as TS
-from .models import TODOISTTASK as TSK
+from src.todoist_auto.models import TODOIST as TO
+from src.todoist_auto.models import TODOISTSECTION
+from src.todoist_auto.models import TODOISTTASK
+from src.todoist_auto.models import TODOISTPROJECT
 
 def ret_not_special_items_of_a_class(class_instance) :
     m = inspect.getmembers(class_instance)
     return {x : y for x , y in m if not x.startswith('__')}
 
-TSD = ret_not_special_items_of_a_class(TS)
-TTD = ret_not_special_items_of_a_class(TSK)
+TSD = ret_not_special_items_of_a_class(TODOISTSECTION)
+TTD = ret_not_special_items_of_a_class(TODOISTTASK)
+TPD = ret_not_special_items_of_a_class(TODOISTPROJECT)
 
 def get_all_sections() :
     secs = asyncio.run(get_sections_async())
@@ -47,3 +49,25 @@ def get_all_tasks() :
     for col in TTD :
         df[col] = [getattr(x , col) for x in tsks]
     return df
+
+async def get_all_projects_async() :
+    api = TodoistAPIAsync(TO.tok)
+    prjs = await api.get_projects()
+    return prjs
+
+def get_all_projects() :
+    prjs = asyncio.run(get_all_projects_async())
+    df = pd.DataFrame()
+    for col in TPD :
+        df[col] = [getattr(x , col) for x in prjs]
+
+    return df
+
+##
+df = get_all_projects()
+
+##
+df = get_all_sections()
+
+##
+##
