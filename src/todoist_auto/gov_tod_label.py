@@ -9,14 +9,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.todoist_auto.models import FILE as F
-from src.todoist_auto.models import TODOIST as TO
-from src.todoist_auto.models import TODOISTPROJECT as TP
-from src.todoist_auto.models import TODOISTTASK as TSK
-from src.todoist_auto.models import VAR as V
-from src.todoist_auto.util import get_all_projects
-from src.todoist_auto.util import get_all_sections
-from src.todoist_auto.util import get_all_tasks
+from .models import FILE as F
+from .models import TODOIST as TO
+from .models import TODOISTPROJECT as TP
+from .models import TODOISTTASK as TSK
+from .models import VAR as V
+from .util import get_all_projects
+from .util import get_all_sections
+from .util import get_all_tasks
 
 MAP = pd.DataFrame()
 

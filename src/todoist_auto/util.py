@@ -5,10 +5,10 @@ import pandas as pd
 from todoist_api.api import TodoistAPI
 from todoist_api.api_async import TodoistAPIAsync
 
-from src.todoist_auto.models import TODOIST as TO
-from src.todoist_auto.models import TODOISTSECTION
-from src.todoist_auto.models import TODOISTTASK
-from src.todoist_auto.models import TODOISTPROJECT
+from .models import TODOIST as TO
+from .models import TODOISTSECTION
+from .models import TODOISTTASK
+from .models import TODOISTPROJECT
 
 def ret_not_special_items_of_a_class(class_instance) :
     m = inspect.getmembers(class_instance)
