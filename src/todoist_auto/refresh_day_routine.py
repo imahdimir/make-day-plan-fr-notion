@@ -11,16 +11,16 @@ import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
 
-from .models import GSHEET
-from .models import TODOIST as TO
-from .models import TODOISTPROJECT as TP
-from .models import TODOISTSECTION as TS
-from .models import TODOISTTASK as TSK
-from .models import VAR as V
-from .util import del_sections
-from .util import get_all_sections
-from .util import get_all_tasks
-from .util import ret_not_special_items_of_a_class
+from src.todoist_auto.models import GSHEET
+from src.todoist_auto.models import TODOIST as TO
+from src.todoist_auto.models import TODOISTPROJECT as TP
+from src.todoist_auto.models import TODOISTSECTION as TS
+from src.todoist_auto.models import TODOISTTASK as TSK
+from src.todoist_auto.models import VAR as V
+from src.todoist_auto.util import del_sections
+from src.todoist_auto.util import get_all_sections
+from src.todoist_auto.util import get_all_tasks
+from src.todoist_auto.util import ret_not_special_items_of_a_class
 
 tsd = ret_not_special_items_of_a_class(TS)
 tpd = ret_not_special_items_of_a_class(TP)
@@ -145,6 +145,8 @@ def make_all_sections(df) :
     return df
 
 def make_tasks_with_the_indent(df , indent) :
+    """ """
+
     msk = df[V.indnt].eq(indent)
 
     df.loc[msk , [V.par_id]] = df[V.tsk_id].ffill()
@@ -152,10 +154,11 @@ def make_tasks_with_the_indent(df , indent) :
     df1 = df[msk]
 
     for idx , row in df1.iterrows() :
+        s_id = row[V.sec_id] if not pd.isna(row[V.sec_id]) else None
         tsk = API.add_task(content = row[V.cnt] ,
                            description = row[V.dsc] ,
                            project_id = TO.routine_proj_id ,
-                           section_id = row[V.sec_id] ,
+                           section_id = s_id ,
                            priority = 5 - int(row[V.pri]) ,
                            parent_id = row[V.par_id])
 
