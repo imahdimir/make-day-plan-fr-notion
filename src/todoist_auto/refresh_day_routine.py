@@ -1,7 +1,5 @@
 """
 
-    Renew the routine project in Todoist.
-
     """
 
 import uuid
@@ -11,16 +9,16 @@ import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
 
-from src.todoist_auto.models import GSHEET
-from src.todoist_auto.models import TODOIST as TO
-from src.todoist_auto.models import TODOISTPROJECT as TP
-from src.todoist_auto.models import TODOISTSECTION as TS
-from src.todoist_auto.models import TODOISTTASK as TSK
-from src.todoist_auto.models import VAR as V
-from src.todoist_auto.util import del_sections
-from src.todoist_auto.util import get_all_sections
-from src.todoist_auto.util import get_all_tasks
-from src.todoist_auto.util import ret_not_special_items_of_a_class
+from .models import GSHEET
+from .models import TODOIST as TO
+from .models import TODOISTPROJECT as TP
+from .models import TODOISTSECTION as TS
+from .models import TODOISTTASK as TSK
+from .models import VAR as V
+from .util import del_sections
+from .util import get_all_sections
+from .util import get_all_tasks
+from .util import ret_not_special_items_of_a_class
 
 tsd = ret_not_special_items_of_a_class(TS)
 tpd = ret_not_special_items_of_a_class(TP)
@@ -195,7 +193,7 @@ def main() :
 ##
 if __name__ == '__main__' :
     main()
-    print(Path(__file__).name , ' Done!')
+    print(Path(__file__).name , 'Done!')
 
 def _tset() :
     pass
