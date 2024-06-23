@@ -11,16 +11,16 @@ import pandas as pd
 import requests
 from todoist_api.api import TodoistAPI
 
-from .models import GSHEET
-from .models import TODOIST as TO
-from .models import TODOISTPROJECT as TP
-from .models import TODOISTSECTION as TS
-from .models import TODOISTTASK as TSK
-from .models import VAR as V
-from .util import del_sections
-from .util import get_all_sections
-from .util import get_all_tasks
-from .util import ret_not_special_items_of_a_class
+from src.todoist_auto.models import GSHEET
+from src.todoist_auto.models import TODOIST as TO
+from src.todoist_auto.models import TODOISTPROJECT as TP
+from src.todoist_auto.models import TODOISTSECTION as TS
+from src.todoist_auto.models import TODOISTTASK as TSK
+from src.todoist_auto.models import VAR as V
+from src.todoist_auto.util import del_sections
+from src.todoist_auto.util import get_all_sections
+from src.todoist_auto.util import get_all_tasks
+from src.todoist_auto.util import ret_not_special_items_of_a_class
 
 tsd = ret_not_special_items_of_a_class(TS)
 tpd = ret_not_special_items_of_a_class(TP)
@@ -90,20 +90,8 @@ def _find_next_not_sub_task_index(subdf , indent) :
     df.loc[: , ['h']] = df[V.indnt].le(indent)
     return df['h'].idxmax()
 
-def propagate_exculsion_and_drop_final_exculded_tasks(df) :
-    """ Propagate exculsion to sub-tasks and drop exculded tasks. """
-    # reset index
-    df = df.reset_index(drop = True)
+def drop_excluded_tasks(df) :
     df[V.excl] = df[V.excl].eq('TRUE')
-    # propagate exculde TO sub-tasks
-    for indx , row in df.iloc[:-1].iterrows() :
-        if not row[V.excl] :
-            continue
-        nidx = _find_next_not_sub_task_index(df[indx + 1 :] , row[V.indnt])
-        msk_range = pd.RangeIndex(start = indx , stop = nidx)
-        msk = df.index.isin(msk_range)
-        df.loc[msk , V.excl] = True
-    # drop exculded tasks
     df = df[~ df[V.excl]]
     return df
 
@@ -186,7 +174,7 @@ def main() :
     df = specify_indents(df)
 
     ##
-    df = propagate_exculsion_and_drop_final_exculded_tasks(df)
+    df = drop_excluded_tasks(df)
 
     ##
     df = fix_cols(df)
