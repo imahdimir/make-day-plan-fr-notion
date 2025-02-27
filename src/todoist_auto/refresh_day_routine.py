@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 import requests
+import time
 from todoist_api.api import TodoistAPI
 
 from .models import GSHEET
@@ -112,33 +113,22 @@ def fix_cols(df) :
 
 def make_all_sections(df) :
     """ Make all sections and get their IDs, assuming section order prefixes are unique. """
-
     df1 = df.copy()
-
     df1 = df1.dropna(subset = [V.sec])
-
     df1 = df1[[V.sec]]
-
     for idx , ro in df1.iterrows() :
         s = ro[V.sec]
         ose = API.add_section(s , TO.routine_proj_id)
         df.at[idx , V.sec_id] = ose.id
-
     print('All sections created.')
-
     df[V.sec_id] = df[V.sec_id].ffill()
-
     return df
 
 def make_tasks_with_the_indent(df , indent) :
     """ """
-
     msk = df[V.indnt].eq(indent)
-
     df.loc[msk , [V.par_id]] = df[V.tsk_id].ffill()
-
     df1 = df[msk]
-
     for idx , row in df1.iterrows() :
         s_id = row[V.sec_id] if not pd.isna(row[V.sec_id]) else None
         tsk = API.add_task(content = row[V.cnt] ,
@@ -147,9 +137,8 @@ def make_tasks_with_the_indent(df , indent) :
                            section_id = s_id ,
                            priority = 5 - int(row[V.pri]) ,
                            parent_id = row[V.par_id])
-
         df.loc[idx , [V.tsk_id]] = tsk.id
-
+        time.sleep(.1)
     return df
 
 def main() :
@@ -192,8 +181,13 @@ def main() :
 
 ##
 if __name__ == '__main__' :
+    pass
+
+    ##
     main()
     print(Path(__file__).name , 'Done!')
+
+    ##
 
 def _tset() :
     pass

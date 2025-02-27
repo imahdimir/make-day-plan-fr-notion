@@ -1,3 +1,7 @@
+"""
+
+    """
+
 import asyncio
 import inspect
 
@@ -60,14 +64,4 @@ def get_all_projects() :
     df = pd.DataFrame()
     for col in TPD :
         df[col] = [getattr(x , col) for x in prjs]
-
     return df
-
-##
-df = get_all_projects()
-
-##
-df = get_all_sections()
-
-##
-##
